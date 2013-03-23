@@ -11,6 +11,8 @@ public class CrawlDocument {
 
     protected String mimeType;
 
+    protected int linkAnalyzeCount = 0;
+
     protected Map<String,String> incomingLinks;
 
     public String getUrl() {
@@ -47,5 +49,13 @@ public class CrawlDocument {
 
     public void addIncomingLink(String url) {
         this.incomingLinks.put(url,url);
+    }
+
+    public void incrementLinkAnalyzeCount() {
+        this.linkAnalyzeCount++;
+    }
+
+    public int getLinkAnalyzeCount() {
+        return this.linkAnalyzeCount;
     }
 }

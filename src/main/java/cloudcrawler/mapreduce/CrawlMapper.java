@@ -1,6 +1,9 @@
 package cloudcrawler.mapreduce;
 
+import cloudcrawler.domain.CrawlDocument;
 import cloudcrawler.system.http.HttpService;
+import com.google.gson.Gson;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.http.Header;
@@ -15,8 +18,9 @@ public class CrawlMapper extends Mapper<Text, Text, Text, Text> {
 
     private Text content = new Text();
 
-
     private HttpService httpService = new HttpService();
+
+    private Gson gson = new Gson();
 
     /**
      *
@@ -32,23 +36,33 @@ public class CrawlMapper extends Mapper<Text, Text, Text, Text> {
             content.set(itr.nextToken());
 
             try {
-                URI uri = new URI(key.toString());
 
-                HttpResponse headResponse   = httpService.getUrlWithHead(uri);
-                Header header               = headResponse.getLastHeader(new String("Content-Type"));
+                if(content.toString().trim() == "") {
+                    URI uri = new URI(key.toString());
 
-                if(header.getValue().contains(new String("text/html"))) {
-                    //do the real request
-                    HttpResponse getResponse    = httpService.getUriWithGet(uri);
-                    String website              = getResponse.getEntity().getContent().toString();
-                    content                     = new Text(website);
+                    HttpResponse headResponse   = httpService.getUrlWithHead(uri);
+                    Header header               = headResponse.getLastHeader(new String("Content-Type"));
+
+                    if(header.getValue().contains(new String("text/html"))) {
+                        //do the real request
+                        HttpResponse getResponse    = httpService.getUriWithGet(uri);
+                        String website              = getResponse.getEntity().getContent().toString();
+
+                        CrawlDocument crawled       = new CrawlDocument();
+                        crawled.setContent(website);
+                        crawled.setMimeType(getResponse.getEntity().getContentType().getValue());
+                        crawled.setUrl(uri.toString());
+
+                        String json = gson.toJson(crawled);
+                        content = new Text( Base64.encodeBase64(json.getBytes()) );
+                    }
                 }
 
 
                 context.write(key, content);
 
             } catch (URISyntaxException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                e.printStackTrace();
             }
         }
      }

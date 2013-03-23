@@ -1,6 +1,7 @@
 cloudcrawler/domain/contentparser/AbstractContentParser.class
 cloudcrawler/mapreduce/CrawlMapper.class
-cloudcrawler/system/http/HttpService.class
+cloudcrawler/system/uri/URIUnifier.class
 cloudcrawler/mapreduce/Crawler.class
+cloudcrawler/system/http/HttpService.class
 cloudcrawler/mapreduce/LinkFollowReducer.class
 cloudcrawler/domain/CrawlDocument.class
