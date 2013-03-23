@@ -31,7 +31,7 @@ public class UriUnifierTest {
     }
 
     @Parameterized.Parameters
-    public static Collection primeNumbers() {
+    public static Collection urisToUnify() {
         return Arrays.asList(new Object[][]{
                 {"http://www.google.de/", "http://www.google.de/", "http://www.google.de/", "http://www.google.de/"},
                 {"./one.html", "http://www.test.de/", "", "http://www.test.de/one.html"},
