@@ -1,7 +1,7 @@
 package cloudcrawler.domain;
 
 
-import java.util.Map;
+import java.util.HashMap;
 
 public class CrawlDocument {
 
@@ -11,9 +11,11 @@ public class CrawlDocument {
 
     protected String mimeType;
 
+    protected int crawCount = 0;
+
     protected int linkAnalyzeCount = 0;
 
-    protected Map<String,String> incomingLinks;
+    protected HashMap<String,String> incomingLinks = new HashMap<String, String>();
 
     public String getUrl() {
         return url;
@@ -39,11 +41,11 @@ public class CrawlDocument {
         this.mimeType = mimeType;
     }
 
-    public Map<String, String> getIncomingLinks() {
+    public HashMap<String, String> getIncomingLinks() {
         return incomingLinks;
     }
 
-    public void setIncomingLinks(Map<String, String> incomingLinks) {
+    public void setIncomingLinks(HashMap<String, String> incomingLinks) {
         this.incomingLinks = incomingLinks;
     }
 
@@ -58,4 +60,16 @@ public class CrawlDocument {
     public int getLinkAnalyzeCount() {
         return this.linkAnalyzeCount;
     }
+
+    public void incrementCrawCount() {
+        this.crawCount++;
+    }
+
+    /**
+     * @return int
+     */
+    public int getCrawlCount() {
+        return this.crawCount;
+    }
+
 }

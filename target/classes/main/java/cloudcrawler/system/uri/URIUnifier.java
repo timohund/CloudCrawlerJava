@@ -6,6 +6,9 @@ import java.net.URISyntaxException;
 
 public class URIUnifier {
 
+    public URIUnifier() {
+
+    }
     /**
      * @param hrefUri
      * @param sourceUri

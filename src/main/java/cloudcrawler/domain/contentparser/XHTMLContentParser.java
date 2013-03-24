@@ -107,12 +107,16 @@ public class XHTMLContentParser extends XMLContentParser {
      * @throws URISyntaxException
      */
     private URI getUriFromHrefNode(Node aNode) throws URISyntaxException {
-        String aHref = "";
+        URI aHref = new URI("");
         try {
             Node aHrefAttribute = aNode.getAttributes().getNamedItem("href");
-            aHref = aHrefAttribute.getNodeValue().toString();
+            String aHrefString = aHrefAttribute.getNodeValue().toString();
+            aHref = new URI(aHrefString);
         } catch (NullPointerException e) {
+            //can happen
+        } catch (URISyntaxException e) {
+            //can happen
         }
-        return new URI(aHref);
+        return aHref;
     }
 }
