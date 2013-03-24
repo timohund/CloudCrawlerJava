@@ -27,7 +27,7 @@ public class Crawler {
         job.setInputFormatClass(KeyValueTextInputFormat.class);
 
         FileInputFormat.addInputPath(job, new Path("/tmp/java/start"));
-        FileOutputFormat.setOutputPath(job, new Path("output"));
+        FileOutputFormat.setOutputPath(job, new Path("/tmp/java/output2"));
 
         System.exit(job.waitForCompletion(true) ? 0 : 1);
     }

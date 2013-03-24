@@ -3,16 +3,15 @@ package cloudcrawler.mapreduce;
 import cloudcrawler.domain.CrawlDocument;
 import cloudcrawler.domain.contentparser.XHTMLContentParser;
 import com.google.gson.Gson;
-import org.apache.commons.codec.binary.Base64;
+import com.google.gson.JsonIOException;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Vector;
 
 public class LinkFollowReducer extends Reducer<Text, Text, Text, Text> {
@@ -32,10 +31,12 @@ public class LinkFollowReducer extends Reducer<Text, Text, Text, Text> {
 
             for (Text val : values) {
                 try {
-                    String json = Base64.decodeBase64(val.toString()).toString();
+                    String json = val.toString();
                     CrawlDocument crawlDocument = gson.fromJson(json,CrawlDocument.class);
 
-                    if(crawlDocument.getLinkAnalyzeCount() == 0) {
+                    result = new Text(crawlDocument.getContent());
+                    int analyzeCount = crawlDocument.getLinkAnalyzeCount();
+                    if(analyzeCount == 0) {
                         String content = crawlDocument.getContent();
 
                         XHTMLContentParser xHTMLParser = new XHTMLContentParser();
@@ -45,14 +46,18 @@ public class LinkFollowReducer extends Reducer<Text, Text, Text, Text> {
                         for(URI linkUri : uris) {
 
                         }
-                        this.merge(crawlDocument);
+                        context.write(key, new Text(gson.toJson(result)));
+
+                   //     this.merge(crawlDocument);
                     } else {
-                        this.merge(crawlDocument);
+                   //     this.merge(crawlDocument);
                     }
 
+                } catch (JsonIOException e) {
+                    e.printStackTrace();
                 } catch (ParserConfigurationException e) {
                     e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                } catch (SAXException e) {
+                } catch (SAXParseException e) {
                     e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
                 } catch (XPathExpressionException e) {
                     e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -60,10 +65,10 @@ public class LinkFollowReducer extends Reducer<Text, Text, Text, Text> {
 
                 context.progress();
             }
-        }catch (URISyntaxException e) {
+        }catch (Exception e) {
             e.printStackTrace();
         }
 
-        context.write(key, result);
+
     }
 }

@@ -23,13 +23,14 @@ public class XHTMLContentParserTest {
     @Test
     public void simpleTest() throws URISyntaxException, ParserConfigurationException, SAXException, IOException, XPathExpressionException {
         String testContent = new String(
+                "<!DOCTYPE html>"+
                 "<html>" +
                 "   <head>" +
                 "       <title>simpletest</title>" +
-                "       <base href='http://www.google.de/'/>" +
+                "       <base href=\"http://www.google.de/\"/>" +
                 "  </head>" +
                 "   <body>" +
-                "       <a href='foo.html'>bla</a>    "+
+                "       <a href=\"http://www.google.de/foo.html\">bla</a>    "+
                 "   </body>"+
                 "</html>");
 
@@ -43,6 +44,6 @@ public class XHTMLContentParserTest {
         Assert.assertEquals("http://www.google.de/",parser.getBaseHrefUri().toString());
 
             //can we extract the links?
-        Assert.assertEquals("foo.html",parser.getExternalLinkUris().get(0).toString());
+        Assert.assertEquals("http://www.google.de/foo.html",parser.getExternalLinkUris().get(0).toString());
     }
 }

@@ -16,11 +16,11 @@ abstract public class AbstractContentParser {
 
 
     /**
-     * @param sourceUrl
+     * @param sourceUri
      * @param sourceContent
      * @param mimeType
      */
-    public void initialize(URI sourceUrl, String sourceContent, String mimeType) throws IOException, SAXException, ParserConfigurationException {
+    public void initialize(URI sourceUri, String sourceContent, String mimeType) throws IOException, SAXException, ParserConfigurationException {
         this.sourceUri = sourceUri;
         this.sourceContent = sourceContent;
         this.mimeType = mimeType;
