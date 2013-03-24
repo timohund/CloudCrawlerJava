@@ -1,6 +1,8 @@
 package cloudcrawler.system.uri;
 
 
+import org.apache.http.client.utils.URIBuilder;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -41,6 +43,12 @@ public class URIUnifier {
 
         result = result.normalize();
 
+        String path = result.getRawPath();
+        if(path == null || path.equals("")) {
+            URIBuilder builder = new URIBuilder(result);
+            builder.setPath("/");
+            result = builder.build();
+        }
         return result;
     }
 }

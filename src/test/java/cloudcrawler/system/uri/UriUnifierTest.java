@@ -39,7 +39,11 @@ public class UriUnifierTest {
                 {"../one.html", "http://www.test.de/test/", "", "http://www.test.de/one.html"},
                 {"./one.html", "http://www.test.de/foo/", "", "http://www.test.de/foo/one.html"},
                 {"one.html", "http://www.test.de/foo/bar/cola", "http://www.test.de/foo/", "http://www.test.de/foo/one.html"},
-                {"//www.heise.de/foo?bar=bar@test", "http://www.test.de/foo/bar/cola", "", "http://www.heise.de/foo?bar=bar@test"}
+                {"//www.heise.de/foo?bar=bar@test", "http://www.test.de/foo/bar/cola", "", "http://www.heise.de/foo?bar=bar@test"},
+                {"http://www.heise.de","","","http://www.heise.de/"},
+                {"/one.html","http://www.test.de/foo/bar/d;p?q","","http://www.test.de/one.html"},
+                {"/one.html","http://www.test.de/foo/bar/cola","http://www.test.de/foo/","http://www.test.de/one.html"},
+          //    {"http://www.customer.de/Ohrstecker+\"SMILEY\"+925er+Sterlingsilber+24k+vergoldet/f4259fce60f4988c9fd9c30da0414e2af0bb0d8f,de_DE,pd.html","","","http://www.customer.de/Ohrstecker+\"SMILEY\"+925er+Sterlingsilber+24k+vergoldet/f4259fce60f4988c9fd9c30da0414e2af0bb0d8f,de_DE,pd.html"}
         });
     }
 

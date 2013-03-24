@@ -21,6 +21,7 @@ public class Crawler {
         Job job = new Job(conf, "cloudcrawler");
         job.setJarByClass(Crawler.class);
         job.setMapperClass(CrawlMapper.class);
+
         job.setReducerClass(LinkFollowReducer.class);
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Text.class);
