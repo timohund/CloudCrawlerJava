@@ -10,7 +10,6 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -80,11 +79,18 @@ public class CrawlingReducer extends Reducer<Text, Text, Text, Text> {
         context.setStatus("done");
     }
 
+    /**
+     *
+     * @param key
+     * @param values
+     * @param context
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 
         try {
             this.result = new HashMap<String, CrawlingDocument>();
-            URI sourceURI = new URI(key.toString());
 
             for (Text val : values) {
                 String json = val.toString();

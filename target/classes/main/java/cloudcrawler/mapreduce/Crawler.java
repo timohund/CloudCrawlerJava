@@ -8,6 +8,14 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.KeyValueTextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
+/**
+ * MapReduce job that is taking the url list
+ * from the first argument, crawls them and attaches
+ * the link structure to the crawled document
+ * and persists it.
+ *
+ * @author Timo Schmidt <timo-schmidt@gmx.net>
+ */
 public class Crawler {
 
     /**

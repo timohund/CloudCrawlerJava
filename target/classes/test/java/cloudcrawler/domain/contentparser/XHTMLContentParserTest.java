@@ -1,6 +1,7 @@
 package cloudcrawler.domain.contentparser;
 
 import junit.framework.Assert;
+import org.cyberneko.html.parsers.DOMParser;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -38,6 +39,7 @@ public class XHTMLContentParserTest {
         String mimeType = new String("text/html");
 
         XHTMLContentParser parser = new XHTMLContentParser();
+        parser.setDomParser(new DOMParser());
         parser.initialize(pageUri,testContent,mimeType);
 
             //can we get the base href uri?

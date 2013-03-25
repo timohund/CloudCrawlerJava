@@ -4,6 +4,10 @@ package cloudcrawler.domain.crawler;
 import java.net.URI;
 import java.util.HashMap;
 
+/**
+ * A crawling document represent a document that
+ * is crawled by the crawler.
+ */
 public class CrawlingDocument {
 
     protected URI uri;
