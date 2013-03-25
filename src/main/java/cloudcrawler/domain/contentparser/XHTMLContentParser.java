@@ -1,5 +1,6 @@
 package cloudcrawler.domain.contentparser;
 
+import com.google.inject.Inject;
 import org.cyberneko.html.parsers.DOMParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -28,16 +29,22 @@ public class XHTMLContentParser extends XMLContentParser {
 
     protected XPathFactory xPathFactory;
 
+    protected DOMParser domParser;
+
+    @Inject
+    public void setDomParser(DOMParser parser) {
+        this.domParser = parser;
+    }
+
     @Override
     protected void afterInitialize() throws ParserConfigurationException, IOException, SAXException {
-        DOMParser parser    = new DOMParser();
 
-        parser.setProperty("http://cyberneko.org/html/properties/default-encoding", "UTF-8");
-        parser.setProperty("http://cyberneko.org/html/properties/names/elems", "lower");
-        parser.setProperty("http://cyberneko.org/html/properties/names/attrs","lower");
+        domParser.setProperty("http://cyberneko.org/html/properties/default-encoding", "UTF-8");
+        domParser.setProperty("http://cyberneko.org/html/properties/names/elems", "lower");
+        domParser.setProperty("http://cyberneko.org/html/properties/names/attrs", "lower");
 
-        parser.setFeature("http://xml.org/sax/features/validation", false);
-        parser.setFeature("http://cyberneko.org/html/features/balance-tags", false);
+        domParser.setFeature("http://xml.org/sax/features/validation", false);
+        domParser.setFeature("http://cyberneko.org/html/features/balance-tags", false);
 
         InputSource is = new InputSource();
         is.setSystemId(sourceUri.toString());
@@ -45,9 +52,9 @@ public class XHTMLContentParser extends XMLContentParser {
         InputStream stream = new ByteArrayInputStream(this.sourceContent.getBytes("UTF-8"));
         is.setByteStream(stream);
 
-        parser.parse(is);
+        domParser.parse(is);
 
-        domDocument = parser.getDocument();
+        domDocument = domParser.getDocument();
         xPathFactory = XPathFactory.newInstance();
     }
 

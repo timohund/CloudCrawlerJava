@@ -4,6 +4,10 @@ package cloudcrawler.domain.crawler;
 import java.net.URI;
 import java.util.HashMap;
 
+/**
+ * A crawling document represent a document that
+ * is crawled by the crawler.
+ */
 public class CrawlingDocument {
 
     protected URI uri;
@@ -44,10 +48,6 @@ public class CrawlingDocument {
 
     public HashMap<String, String> getIncomingLinks() {
         return incomingLinks;
-    }
-
-    public void setIncomingLinks(HashMap<String, String> incomingLinks) {
-        this.incomingLinks = incomingLinks;
     }
 
     public void addIncomingLink(String url) {

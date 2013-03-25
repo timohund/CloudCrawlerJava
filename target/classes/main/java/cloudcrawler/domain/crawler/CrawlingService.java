@@ -3,6 +3,7 @@ package cloudcrawler.domain.crawler;
 import cloudcrawler.domain.contentparser.XHTMLContentParser;
 import cloudcrawler.system.http.HttpService;
 import cloudcrawler.system.uri.URIUnifier;
+import com.google.inject.Inject;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -31,9 +32,18 @@ import java.util.Vector;
  */
 public class CrawlingService {
 
-    private HttpService httpService = new HttpService();
+    protected HttpService httpService;
 
-    private URIUnifier uriUni = new URIUnifier();
+    protected URIUnifier uriUni;
+
+    protected XHTMLContentParser xHTMLParser;
+
+    @Inject
+    public CrawlingService(HttpService httpService, URIUnifier uriUnifier, XHTMLContentParser xHTMLParser) {
+        this.httpService = httpService;
+        this.uriUni = uriUnifier;
+        this.xHTMLParser = xHTMLParser;
+    }
 
     public Vector<CrawlingDocument> crawlAndFollowLinks(CrawlingDocument toCrawl) throws IOException, InterruptedException, ParserConfigurationException, SAXException, XPathExpressionException, URISyntaxException {
         Vector<CrawlingDocument> results = new Vector<CrawlingDocument>();
@@ -69,7 +79,6 @@ public class CrawlingService {
     protected Vector<CrawlingDocument> prepareLinkedDocuments(Vector<CrawlingDocument> result, CrawlingDocument crawlingDocument) throws XPathExpressionException, URISyntaxException, ParserConfigurationException, SAXException, IOException, InterruptedException {
         int analyzeCount = crawlingDocument.getLinkAnalyzeCount();
         if(analyzeCount == 0 ) {
-            XHTMLContentParser xHTMLParser = new XHTMLContentParser();
             xHTMLParser.initialize(crawlingDocument.getUri(), crawlingDocument.getContent(), crawlingDocument.getMimeType());
             URI baseURI = xHTMLParser.getBaseHrefUri();
             Vector<URI> uris = xHTMLParser.getExternalLinkUris();

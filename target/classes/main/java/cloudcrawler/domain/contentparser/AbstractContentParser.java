@@ -14,7 +14,6 @@ abstract public class AbstractContentParser {
 
     protected String mimeType;
 
-
     /**
      * @param sourceUri
      * @param sourceContent

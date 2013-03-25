@@ -1,8 +1,11 @@
 package cloudcrawler.mapreduce;
 
 import cloudcrawler.domain.crawler.CrawlingDocument;
+import cloudcrawler.ioc.CloudCrawlerModule;
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
@@ -13,9 +16,20 @@ import java.util.Iterator;
 
 public class CrawlingReducer extends Reducer<Text, Text, Text, Text> {
 
-    private Gson gson = new Gson();
+    protected Gson gson = new Gson();
 
-    private HashMap<String,CrawlingDocument> result = new HashMap<String, CrawlingDocument>();
+    protected HashMap<String,CrawlingDocument> result = new HashMap<String, CrawlingDocument>();
+
+    protected Injector injector;
+
+    public CrawlingReducer() {
+        injector = Guice.createInjector(new CloudCrawlerModule());
+        this.setGson(injector.getInstance(Gson.class));
+    }
+
+    public void setGson(Gson gson) {
+        this.gson = gson;
+    }
 
     /**
      *

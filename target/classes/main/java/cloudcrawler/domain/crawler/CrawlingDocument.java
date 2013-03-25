@@ -46,10 +46,6 @@ public class CrawlingDocument {
         return incomingLinks;
     }
 
-    public void setIncomingLinks(HashMap<String, String> incomingLinks) {
-        this.incomingLinks = incomingLinks;
-    }
-
     public void addIncomingLink(String url) {
         this.incomingLinks.put(url,url);
     }
