@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Random;
 import java.util.Vector;
 
 /**
@@ -56,6 +57,7 @@ public class CrawlingService {
 
         if (isHtml) {
             //do the real request
+            System.out.println("Crawling "+toCrawl.getUri().toString());
             HttpResponse getResponse = httpService.getUriWithGet(toCrawl.getUri());
 
             StringWriter writer = new StringWriter();
@@ -76,36 +78,55 @@ public class CrawlingService {
     }
 
 
-    protected Vector<CrawlingDocument> prepareLinkedDocuments(Vector<CrawlingDocument> result, CrawlingDocument crawlingDocument) throws XPathExpressionException, URISyntaxException, ParserConfigurationException, SAXException, IOException, InterruptedException {
+    protected Vector<CrawlingDocument> prepareLinkedDocuments(Vector<CrawlingDocument> result, CrawlingDocument crawlingDocument)  {
         int analyzeCount = crawlingDocument.getLinkAnalyzeCount();
         if(analyzeCount == 0 ) {
-            xHTMLParser.initialize(crawlingDocument.getUri(), crawlingDocument.getContent(), crawlingDocument.getMimeType());
-            URI baseURI = xHTMLParser.getBaseHrefUri();
-            Vector<URI> uris = xHTMLParser.getExternalLinkUris();
+            try {
+                xHTMLParser.initialize(crawlingDocument.getUri(), crawlingDocument.getContent(), crawlingDocument.getMimeType());
+                URI baseURI = xHTMLParser.getBaseHrefUri();
+                Vector<URI> uris = xHTMLParser.getExternalLinkUris();
 
-            for(URI linkUri : uris) {
-                if(!(linkUri == null) && linkUri.toString().contains(".de") ) {
+                for(URI linkUri : uris) {
+                    if(!(linkUri == null) && linkUri.toString().contains(".de") ) {
 
-                    //todo remove query and fragment here, make it more flexible
-                    URI storedUri       = this.uriUni.unifiy(linkUri,crawlingDocument.getUri(),baseURI);
-                    URIBuilder builder  = new URIBuilder(storedUri);
-                    builder.setQuery(null);
-                    builder.setFragment(null);
-                    storedUri           = builder.build();
+                        //todo remove query and fragment here, make it more flexible
+                        URI storedUri       = this.uriUni.unifiy(linkUri,crawlingDocument.getUri(),baseURI);
+                        URIBuilder builder  = new URIBuilder(storedUri);
+                        builder.setQuery(null);
+                        builder.setFragment(null);
+                        storedUri           = builder.build();
 
-                    System.out.println("Following Link "+storedUri);
 
-                    //create a new document from the followed link
-                    CrawlingDocument linkDocument = new CrawlingDocument();
-                    linkDocument.addIncomingLink(crawlingDocument.getUri().toString());
-                    linkDocument.setUri(storedUri);
+                        //create a new document from the followed link
+                        CrawlingDocument linkDocument = new CrawlingDocument();
 
-                    result.add(linkDocument);
+                        if(!storedUri.getHost().equals(crawlingDocument.getUri().getHost())) {
+                            Random rand = new Random();
+                            //int randomNum = rand.nextInt(max - min + 1) + min;
+                            int randomNum = rand.nextInt(8 - 2 + 1) + 2;
+                            linkDocument.setCrawlingCountdown(randomNum);
+                        }
+                        linkDocument.addIncomingLink(crawlingDocument.getUri().toString());
+                        linkDocument.setUri(storedUri);
+
+                        result.add(linkDocument);
+                    }
                 }
-            }
 
-            crawlingDocument.incrementLinkAnalyzeCount();
-            crawlingDocument.setContent("");
+                crawlingDocument.incrementLinkAnalyzeCount();
+                crawlingDocument.setContent("");
+
+            } catch (IOException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            } catch (SAXException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            } catch (ParserConfigurationException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            } catch (XPathExpressionException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            } catch (URISyntaxException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
         }
 
         return result;

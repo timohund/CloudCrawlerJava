@@ -69,15 +69,19 @@ public class CrawlingMapper extends Mapper<Text, Text, Text, Text> {
             URI uri = new URI(key.toString());
             crawled.setUri(uri);
 
-            if(crawled != null && crawled.getCrawlCount() == 0) {
-                Vector<CrawlingDocument> crawlingResults = crawlingService.crawlAndFollowLinks(crawled);
+            if(crawled != null && crawled.getCrawlCount() == 0 ) {
+                if(crawled.getCrawlingCountdown() == 0) {
+                    Vector<CrawlingDocument> crawlingResults = crawlingService.crawlAndFollowLinks(crawled);
 
-                for(CrawlingDocument crawlingResult : crawlingResults) {
-                    String json = gson.toJson(crawlingResult);
-                    Text crawlingResultKey = new Text(crawlingResult.getUri().toString());
-                    Text crawlingResultValue = new Text(json.toString());
+                    for(CrawlingDocument crawlingResult : crawlingResults) {
+                        String json = gson.toJson(crawlingResult);
+                        Text crawlingResultKey = new Text(crawlingResult.getUri().toString());
+                        Text crawlingResultValue = new Text(json.toString());
 
-                    context.write(crawlingResultKey, crawlingResultValue);
+                        context.write(crawlingResultKey, crawlingResultValue);
+                    }
+                } else {
+                    crawled.decrementCrawlingCountdown();
                 }
             }
         } catch (URISyntaxException e) {

@@ -1,11 +1,10 @@
 package cloudcrawler.domain.contentparser;
 
-import com.google.inject.Inject;
-import org.cyberneko.html.parsers.DOMParser;
+import nu.validator.htmlparser.common.Heuristics;
+import nu.validator.htmlparser.dom.HtmlDocumentBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -25,39 +24,21 @@ import java.util.Vector;
  */
 public class XHTMLContentParser extends XMLContentParser {
 
-    protected Document domDocument;
+    protected Document document;
 
-    protected XPathFactory xPathFactory;
 
-    protected DOMParser domParser;
-
-    @Inject
-    public void setDomParser(DOMParser parser) {
-        this.domParser = parser;
-    }
 
     @Override
     protected void afterInitialize() throws ParserConfigurationException, IOException, SAXException {
-
-        domParser.setProperty("http://cyberneko.org/html/properties/default-encoding", "UTF-8");
-        domParser.setProperty("http://cyberneko.org/html/properties/names/elems", "lower");
-        domParser.setProperty("http://cyberneko.org/html/properties/names/attrs", "lower");
-
-        domParser.setFeature("http://xml.org/sax/features/validation", false);
-        domParser.setFeature("http://cyberneko.org/html/features/balance-tags", false);
-
-        InputSource is = new InputSource();
-        is.setSystemId(sourceUri.toString());
-
         InputStream stream = new ByteArrayInputStream(this.sourceContent.getBytes("UTF-8"));
-        is.setByteStream(stream);
 
-        domParser.parse(is);
-
-        domDocument = domParser.getDocument();
-        xPathFactory = XPathFactory.newInstance();
+        // Use the TagSoup parser to build an XOM document from HTML
+        HtmlDocumentBuilder docBuilder = new HtmlDocumentBuilder();
+        docBuilder.setReportingDoctype(true);
+        docBuilder.setHtml4ModeCompatibleWithXhtml1Schemata(true);
+        docBuilder.setHeuristics(Heuristics.ALL);
+        document = docBuilder.parse(stream);
     }
-
     /**
      * Retrieves the external links of an html document.
      *
@@ -68,10 +49,7 @@ public class XHTMLContentParser extends XMLContentParser {
     public Vector<URI> getExternalLinkUris() throws XPathExpressionException, URISyntaxException {
         Vector<URI> linkCollection = new Vector<URI>() ;
 
-        XPath xpath = xPathFactory.newXPath();
-        XPathExpression ex = xpath.compile("//A");
-        Object result = ex.evaluate(this.domDocument, XPathConstants.NODESET);
-        NodeList nodes = (NodeList) result;
+        NodeList nodes = document.getElementsByTagName("a");
 
         for (int i = 0; i < nodes.getLength(); i++) {
             Node aNode = nodes.item(i);
@@ -93,10 +71,7 @@ public class XHTMLContentParser extends XMLContentParser {
      */
     public URI getBaseHrefUri() throws XPathExpressionException, URISyntaxException {
         URI baseUri = new URI("");
-        XPath xpath = xPathFactory.newXPath();
-        XPathExpression ex = xpath.compile("//BASE");
-        Object result = ex.evaluate(this.domDocument, XPathConstants.NODESET);
-        NodeList nodes = (NodeList) result;
+        NodeList nodes = document.getElementsByTagName("base");
 
         if(nodes.getLength() > 0) {
             Node firstNode = nodes.item(0);

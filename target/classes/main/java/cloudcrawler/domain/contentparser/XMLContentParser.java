@@ -15,7 +15,7 @@ import java.io.IOException;
 public class XMLContentParser extends AbstractContentParser{
 
     @Override
-    protected void afterInitialize() throws ParserConfigurationException, IOException, SAXException {
+    protected void afterInitialize() throws ParserConfigurationException, IOException, SAXException{
         //To change body of implemented methods use File | Settings | File Templates.
     }
 }

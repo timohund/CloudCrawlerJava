@@ -18,7 +18,14 @@ public class CrawlingDocument {
 
     protected int crawCount = 0;
 
+    /**
+     * Crawling countdown is used to craw pages not directly.
+     * It will be set and decreased and when it's 0 the page will be crawled.
+     */
+    protected int crawlingCountdown = 0;
+
     protected int linkAnalyzeCount = 0;
+
 
     protected HashMap<String,String> incomingLinks = new HashMap<String, String>();
 
@@ -71,5 +78,17 @@ public class CrawlingDocument {
      */
     public int getCrawlCount() {
         return this.crawCount;
+    }
+
+    public int getCrawlingCountdown() {
+        return crawlingCountdown;
+    }
+
+    public void setCrawlingCountdown(int crawlingCountdown) {
+        this.crawlingCountdown = crawlingCountdown;
+    }
+
+    public void decrementCrawlingCountdown() {
+        this.crawlingCountdown--;
     }
 }
