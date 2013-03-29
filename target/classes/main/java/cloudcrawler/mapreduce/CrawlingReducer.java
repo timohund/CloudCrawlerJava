@@ -1,6 +1,7 @@
 package cloudcrawler.mapreduce;
 
 import cloudcrawler.domain.crawler.CrawlingDocument;
+import cloudcrawler.domain.crawler.CrawlingDocumentMerger;
 import cloudcrawler.ioc.CloudCrawlerModule;
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
@@ -17,70 +18,25 @@ public class CrawlingReducer extends Reducer<Text, Text, Text, Text> {
 
     protected Gson gson = new Gson();
 
-    protected HashMap<String,CrawlingDocument> result = new HashMap<String, CrawlingDocument>();
-
     protected Injector injector;
+
+    protected CrawlingDocumentMerger merger;
 
     public CrawlingReducer() {
         injector = Guice.createInjector(new CloudCrawlerModule());
         this.setGson(injector.getInstance(Gson.class));
+        this.setMerger(injector.getInstance(CrawlingDocumentMerger.class));
     }
 
     public void setGson(Gson gson) {
         this.gson = gson;
     }
 
-    /**
-     *
-     * @param key
-     * @param crawlingDocument
-     */
-    protected void merge(Text key, CrawlingDocument crawlingDocument) {
-        CrawlingDocument masterDocument = crawlingDocument;
-        if(result.containsKey(key.toString())) {
-            CrawlingDocument slaveDocument;
-            CrawlingDocument currentStoredResult = result.get(key.toString());
-
-            if(currentStoredResult != null && currentStoredResult.getCrawlCount() > 0) {
-               masterDocument = currentStoredResult;
-               slaveDocument = crawlingDocument;
-            } else {
-               slaveDocument = currentStoredResult;
-            }
-
-            HashMap<String,String> links =  slaveDocument.getIncomingLinks();
-
-            if(links != null) {
-                Iterator iterator = links.keySet().iterator();
-                while(iterator.hasNext()) {
-                    String linkKey = iterator.next().toString();
-                    String linkToAdd = links.get(linkKey).toString();
-                    // weiterverabeitung der Werte...
-                    masterDocument.addIncomingLink(linkToAdd);
-                }
-            }
-        }
-
-        result.remove(key.toString());
-
-        result.put(key.toString(), masterDocument);
-
-    }
-
-    protected void emitAll(Context context) throws IOException, InterruptedException {
-        Iterator it = this.result.keySet().iterator();
-        while(it.hasNext()) {
-            String url = it.next().toString();
-            CrawlingDocument document = this.result.get(url);
-            String documentJson = " "+gson.toJson(document);
-            context.write(new Text(url),new Text(documentJson));
-        }
-
-        context.setStatus("done");
+    public void setMerger(CrawlingDocumentMerger merger) {
+        this.merger = merger;
     }
 
     /**
-     *
      * @param key
      * @param values
      * @param context
@@ -90,14 +46,15 @@ public class CrawlingReducer extends Reducer<Text, Text, Text, Text> {
     public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 
         try {
-            this.result = new HashMap<String, CrawlingDocument>();
+
+            this.merger.reset();
 
             for (Text val : values) {
                 String json = val.toString();
 
                 try {
                     CrawlingDocument crawlingDocument = gson.fromJson(json,CrawlingDocument.class);
-                    this.merge(key, crawlingDocument);
+                    merger.merge(key.toString(), crawlingDocument);
 
                 } catch (JsonIOException e) {
                     e.printStackTrace();
@@ -109,9 +66,22 @@ public class CrawlingReducer extends Reducer<Text, Text, Text, Text> {
                 context.progress();
             }
 
-            this.emitAll(context);
+
+            this.emitAll(this.merger.getResult(),context);
         }catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    protected void emitAll(HashMap<String,CrawlingDocument> mergeResult,Context context) throws IOException, InterruptedException {
+        Iterator it = mergeResult.keySet().iterator();
+        while(it.hasNext()) {
+            String url = it.next().toString();
+            CrawlingDocument document = mergeResult.get(url);
+            String documentJson = " "+gson.toJson(document);
+            context.write(new Text(url),new Text(documentJson));
+        }
+
+        context.setStatus("done");
     }
 }

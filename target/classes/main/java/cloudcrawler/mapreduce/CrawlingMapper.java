@@ -71,6 +71,7 @@ public class CrawlingMapper extends Mapper<Text, Text, Text, Text> {
 
             if(crawled != null && crawled.getCrawlCount() == 0 ) {
                 if(crawled.getCrawlingCountdown() == 0) {
+                    Thread.sleep(2000);
                     Vector<CrawlingDocument> crawlingResults = crawlingService.crawlAndFollowLinks(crawled);
 
                     for(CrawlingDocument crawlingResult : crawlingResults) {

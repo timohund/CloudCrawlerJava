@@ -4,6 +4,8 @@ import cloudcrawler.AbstractTest;
 import junit.framework.Assert;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -12,74 +14,51 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.Collection;
 
-/**
- * Created with IntelliJ IDEA.
- * User: timo
- * Date: 23.03.13
- * Time: 16:45
- * To change this template use File | Settings | File Templates.
- */
+
+@RunWith(Parameterized.class)
 public class XHTMLContentParserTest extends AbstractTest {
 
-    @Test
-    public void simpleTest() throws SAXException, ParserConfigurationException, IOException, XPathExpressionException, URISyntaxException {
-        String testContent = new String(
-                "<!DOCTYPE html>"+
-                "<html>" +
-                "   <head>" +
-                "       <title>simpletest</title>" +
-                "       <base href=\"http://www.google.de/\"/>" +
-                "  </head>" +
-                "   <body>" +
-                "       <a href=\"http://www.google.de/foo.html\">bla</a>    "+
-                "   </body>"+
-                "</html>");
+    String fixtureName;
 
-        URI pageUri     = new URI("http://www.google.de/");
-        String mimeType = new String("text/html");
+    URI fixtureUri;
 
-        XHTMLContentParser parser = new XHTMLContentParser();
-   //     parser.setDomParser(new DOMParser());
-        parser.initialize(pageUri,testContent,mimeType);
+    String expectedBaseHref;
 
-            //can we get the base href uri?
-        Assert.assertEquals("http://www.google.de/", parser.getBaseHrefUri().toString());
-
-            //can we extract the links?
-        Assert.assertEquals("http://www.google.de/foo.html",parser.getExternalLinkUris().get(0).toString());
+    public XHTMLContentParserTest(String fixtureName, String fixtureUri, String expectedBaseHref) throws URISyntaxException {
+        this.fixtureName = fixtureName;
+        this.fixtureUri = new URI(fixtureUri);
+        this.expectedBaseHref = expectedBaseHref;
     }
 
 
+    @Parameterized.Parameters
+    public static Collection urisToUnify() {
+        return Arrays.asList(new Object[][]{
+                {"simpleFixture.html", "", "http://www.google.de/"},
+                {"admin-wissen.de.html", "http://www.admin-wissen.de/", "http://www.admin-wissen.de/"},
+                {"microsoft.de.html", "http://www.microsoft.de/", ""},
+                {"aldi.de.html", "http://www.aldi.de/", ""},
+
+
+        });
+    }
 
     @Test
     public void xHTMLExtractionTest() throws IOException, URISyntaxException, ParserConfigurationException, SAXException, XPathExpressionException {
-        File file = new File("src/test/fixtures/admin-wissen.de.html");
+        File file = new File("src/test/fixtures/"+this.fixtureName);
         String content = FileUtils.readFileToString(file);
 
-        URI pageUri     = new URI("http://www.admin-wissen.de/");
         String mimeType = new String("text/html");
 
         XHTMLContentParser parser = new XHTMLContentParser();
-        parser.initialize(pageUri,content,mimeType);
+        parser.initialize(this.fixtureUri,content,mimeType);
 
         String baseUrl  = parser.getBaseHrefUri().toString();
 
-        Assert.assertEquals("http://www.admin-wissen.de/",baseUrl);
-        Assert.assertTrue(parser.getExternalLinkUris().size() > 0);
-    }
-
-    @Test
-    public void xHTMLExtractionTestMs() throws IOException, URISyntaxException, ParserConfigurationException, SAXException, XPathExpressionException {
-        File file = new File("src/test/fixtures/admin-wissen.de.html");
-        String content = FileUtils.readFileToString(file);
-
-        URI pageUri     = new URI("http://www.microsoft.de/");
-        String mimeType = new String("text/html");
-
-        XHTMLContentParser parser = new XHTMLContentParser();
-        parser.initialize(pageUri,content,mimeType);
-
+        Assert.assertEquals(this.expectedBaseHref,baseUrl);
         Assert.assertTrue(parser.getExternalLinkUris().size() > 0);
     }
 }
