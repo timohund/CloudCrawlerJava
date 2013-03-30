@@ -80,8 +80,10 @@ public class CrawlingReducer extends Reducer<Text, Text, Text, Text> {
         while(it.hasNext()) {
             String url = it.next().toString();
             Document document = mergeResult.get(url);
-            String documentJson = " "+gson.toJson(document);
-            context.write(new Text(url),new Text(documentJson));
+            DocumentMessage documentMessage = new DocumentMessage();
+            documentMessage.setAttachment(document);
+            String documentMessageJson = " "+gson.toJson(documentMessage);
+            context.write(new Text(url),new Text(documentMessageJson));
         }
 
         context.setStatus("done");

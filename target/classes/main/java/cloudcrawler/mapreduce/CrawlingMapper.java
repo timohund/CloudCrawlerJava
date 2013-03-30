@@ -61,34 +61,49 @@ public class CrawlingMapper extends Mapper<Text, Text, Text, Text> {
                 //no key norhing todo
             if(key.toString().trim() == "") {   return;  }
                 //create or retrieve the crawling document from json
+            DocumentMessage currentDocumentCrawlMessage = new DocumentMessage();
             Document crawled = new Document();
+
+
                 //reconstitute the object or assign the uri
             if (!value.toString().trim().equals("") ) {
-                crawled = gson.fromJson(value.toString(),Document.class);
+                currentDocumentCrawlMessage = gson.fromJson(value.toString(),DocumentMessage.class);
+                crawled = currentDocumentCrawlMessage.getAttachment();
             }
+
 
             URI uri = new URI(key.toString());
             crawled.setUri(uri);
 
-            if(crawled != null && crawled.getCrawlCount() == 0 ) {
-                if(crawled.getCrawlingCountdown() == 0) {
-                    //Thread.sleep(100);
-                    Vector<Document> crawlingResults = crawlingService.crawlAndFollowLinks(crawled);
+            if(crawled != null) {
+                if(crawled.getCrawlCount() == 0 ) {
+                    if(crawled.getCrawlingCountdown() == 0) {
+                        //Thread.sleep(100);
+                        Vector<Document> crawlingResults = crawlingService.crawlAndFollowLinks(crawled);
 
-                    for(Document crawlingResult : crawlingResults) {
-                        DocumentMessage crawlingMessage = new DocumentMessage();
-                        crawlingMessage.setAttachment(crawlingResult);
-                        crawlingMessage.setTargetUri(crawlingResult.getUri());
+                        for(Document crawlingResult : crawlingResults) {
+                            DocumentMessage linkTargetCrwalingMessage = new DocumentMessage();
+                            linkTargetCrwalingMessage.setAttachment(crawlingResult);
+                            linkTargetCrwalingMessage.setTargetUri(crawlingResult.getUri());
 
-                        String json = gson.toJson(crawlingMessage);
+                            String json = gson.toJson(linkTargetCrwalingMessage);
 
-                        Text crawlingResultKey = new Text(crawlingResult.getUri().toString());
+                            Text crawlingResultKey = new Text(crawlingResult.getUri().toString());
+                            Text crawlingResultValue = new Text(json.toString());
+
+                            context.write(crawlingResultKey, crawlingResultValue);
+                        }
+                    } else {
+                            //repost the document
+                        String json = gson.toJson(currentDocumentCrawlMessage);
                         Text crawlingResultValue = new Text(json.toString());
-
-                        context.write(crawlingResultKey, crawlingResultValue);
+                        context.write(key,crawlingResultValue);
                     }
                 } else {
-                    crawled.decrementCrawlingCountdown();
+                       //repost the document
+                    String json = gson.toJson(currentDocumentCrawlMessage);
+                    Text crawlingResultValue = new Text(json.toString());
+                    context.write(key,crawlingResultValue);
                 }
             }
         } catch (URISyntaxException e) {
