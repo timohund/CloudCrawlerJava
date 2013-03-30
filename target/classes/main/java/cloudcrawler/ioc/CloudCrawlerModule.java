@@ -1,5 +1,7 @@
 package cloudcrawler.ioc;
 
+import cloudcrawler.domain.crawler.schedule.CrawlingScheduleStrategy;
+import cloudcrawler.domain.crawler.schedule.ForeignLinksFirstStrategy;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
@@ -14,6 +16,6 @@ public class CloudCrawlerModule implements Module {
 
     @Override
     public void configure(Binder binder) {
-
+        binder.bind(CrawlingScheduleStrategy.class).to(ForeignLinksFirstStrategy.class);
     }
 }

@@ -1,0 +1,4 @@
+/home/timo/Projects/CloudCrawlerJava/src/test/java/cloudcrawler/AbstractTest.java
+/home/timo/Projects/CloudCrawlerJava/src/test/java/cloudcrawler/domain/contentparser/XHTMLContentParserTest.java
+/home/timo/Projects/CloudCrawlerJava/src/test/java/cloudcrawler/system/uri/UriUnifierTest.java
+/home/timo/Projects/CloudCrawlerJava/src/test/java/cloudcrawler/domain/crawler/CrawlingDocumentMergerTest.java

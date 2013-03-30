@@ -1,0 +1,13 @@
+/home/timo/Projects/CloudCrawlerJava/src/main/java/cloudcrawler/system/uri/URIUnifier.java
+/home/timo/Projects/CloudCrawlerJava/src/main/java/cloudcrawler/domain/crawler/CrawlingService.java
+/home/timo/Projects/CloudCrawlerJava/src/main/java/cloudcrawler/mapreduce/Crawler.java
+/home/timo/Projects/CloudCrawlerJava/src/main/java/cloudcrawler/mapreduce/CrawlingMapper.java
+/home/timo/Projects/CloudCrawlerJava/src/main/java/cloudcrawler/system/uri/URIHelper.java
+/home/timo/Projects/CloudCrawlerJava/src/main/java/cloudcrawler/domain/crawler/CrawlingDocumentMerger.java
+/home/timo/Projects/CloudCrawlerJava/src/main/java/cloudcrawler/domain/crawler/CrawlingDocument.java
+/home/timo/Projects/CloudCrawlerJava/src/main/java/cloudcrawler/system/http/HttpService.java
+/home/timo/Projects/CloudCrawlerJava/src/main/java/cloudcrawler/ioc/CloudCrawlerModule.java
+/home/timo/Projects/CloudCrawlerJava/src/main/java/cloudcrawler/domain/contentparser/AbstractContentParser.java
+/home/timo/Projects/CloudCrawlerJava/src/main/java/cloudcrawler/domain/contentparser/XHTMLContentParser.java
+/home/timo/Projects/CloudCrawlerJava/src/main/java/cloudcrawler/mapreduce/CrawlingReducer.java
+/home/timo/Projects/CloudCrawlerJava/src/main/java/cloudcrawler/domain/contentparser/XMLContentParser.java

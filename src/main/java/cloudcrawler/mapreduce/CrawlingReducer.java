@@ -1,7 +1,8 @@
 package cloudcrawler.mapreduce;
 
-import cloudcrawler.domain.crawler.CrawlingDocument;
-import cloudcrawler.domain.crawler.CrawlingDocumentMerger;
+import cloudcrawler.domain.crawler.Document;
+import cloudcrawler.domain.crawler.DocumentMerger;
+import cloudcrawler.domain.crawler.message.DocumentMessage;
 import cloudcrawler.ioc.CloudCrawlerModule;
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
@@ -20,19 +21,19 @@ public class CrawlingReducer extends Reducer<Text, Text, Text, Text> {
 
     protected Injector injector;
 
-    protected CrawlingDocumentMerger merger;
+    protected DocumentMerger merger;
 
     public CrawlingReducer() {
         injector = Guice.createInjector(new CloudCrawlerModule());
         this.setGson(injector.getInstance(Gson.class));
-        this.setMerger(injector.getInstance(CrawlingDocumentMerger.class));
+        this.setMerger(injector.getInstance(DocumentMerger.class));
     }
 
     public void setGson(Gson gson) {
         this.gson = gson;
     }
 
-    public void setMerger(CrawlingDocumentMerger merger) {
+    public void setMerger(DocumentMerger merger) {
         this.merger = merger;
     }
 
@@ -53,8 +54,9 @@ public class CrawlingReducer extends Reducer<Text, Text, Text, Text> {
                 String json = val.toString();
 
                 try {
-                    CrawlingDocument crawlingDocument = gson.fromJson(json,CrawlingDocument.class);
-                    merger.merge(key.toString(), crawlingDocument);
+                    DocumentMessage message = gson.fromJson(json, DocumentMessage.class);
+                    Document document = message.getAttachment();
+                    merger.merge(key.toString(), document);
 
                 } catch (JsonIOException e) {
                     e.printStackTrace();
@@ -73,11 +75,11 @@ public class CrawlingReducer extends Reducer<Text, Text, Text, Text> {
         }
     }
 
-    protected void emitAll(HashMap<String,CrawlingDocument> mergeResult,Context context) throws IOException, InterruptedException {
+    protected void emitAll(HashMap<String,Document> mergeResult,Context context) throws IOException, InterruptedException {
         Iterator it = mergeResult.keySet().iterator();
         while(it.hasNext()) {
             String url = it.next().toString();
-            CrawlingDocument document = mergeResult.get(url);
+            Document document = mergeResult.get(url);
             String documentJson = " "+gson.toJson(document);
             context.write(new Text(url),new Text(documentJson));
         }
