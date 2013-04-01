@@ -125,6 +125,8 @@ public class CrawlingMapper extends Mapper<Text, Text, Text, Text> {
         } catch (XPathExpressionException e) {
             e.printStackTrace();
         } catch (NullPointerException e) {
+            e.printStackTrace();
+
             //todo
         } catch (Exception e) {
             e.printStackTrace();

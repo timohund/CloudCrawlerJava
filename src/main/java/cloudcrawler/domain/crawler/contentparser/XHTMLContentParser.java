@@ -1,5 +1,6 @@
 package cloudcrawler.domain.crawler.contentparser;
 
+import cloudcrawler.domain.crawler.Link;
 import nu.validator.htmlparser.common.Heuristics;
 import nu.validator.htmlparser.dom.HtmlDocumentBuilder;
 import org.w3c.dom.Document;
@@ -8,7 +9,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.*;
+import javax.xml.xpath.XPathExpressionException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,16 +47,26 @@ public class XHTMLContentParser extends XMLContentParser {
      * @throws XPathExpressionException
      * @throws URISyntaxException
      */
-    public Vector<URI> getExternalLinkUris() throws XPathExpressionException, URISyntaxException {
-        Vector<URI> linkCollection = new Vector<URI>() ;
+    public Vector<Link> getExternalLinkUris() throws XPathExpressionException, URISyntaxException {
+        Vector<Link> linkCollection = new Vector<Link>() ;
 
         NodeList nodes = document.getElementsByTagName("a");
 
         for (int i = 0; i < nodes.getLength(); i++) {
             Node aNode = nodes.item(i);
-            URI aHrefUri = getUriFromHrefNode(aNode);
+            URI aHrefUri    = getUriFromHrefNode(aNode);
+            String linkText = aNode.getTextContent();
+            Link link = new Link();
 
-            linkCollection.addElement(aHrefUri);
+            link.setTargetUri(aHrefUri);
+
+            if(linkText.length() > 140) {
+                link.setText(new String(linkText.substring(0,140)));
+            } else {
+                link.setText(linkText);
+            }
+
+            linkCollection.addElement(link);
         }
 
         return linkCollection;

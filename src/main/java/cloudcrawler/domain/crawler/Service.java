@@ -1,6 +1,7 @@
 package cloudcrawler.domain.crawler;
 
 import cloudcrawler.domain.crawler.contentparser.XHTMLContentParser;
+import cloudcrawler.domain.crawler.robots.RobotsTxtService;
 import cloudcrawler.domain.crawler.schedule.CrawlingScheduleStrategy;
 import cloudcrawler.system.http.HttpService;
 import cloudcrawler.system.uri.URIUnifier;
@@ -41,15 +42,18 @@ public class Service {
 
     protected CrawlingScheduleStrategy schedulingStrategy;
 
+    protected RobotsTxtService robotsTxtService;
+
     @Inject
-    public Service(HttpService httpService, URIUnifier uriUnifier, XHTMLContentParser xHTMLParser, CrawlingScheduleStrategy schedulingStrategy) {
+    public Service(HttpService httpService, URIUnifier uriUnifier, XHTMLContentParser xHTMLParser, CrawlingScheduleStrategy schedulingStrategy, RobotsTxtService robotsTxtService) {
         this.httpService = httpService;
         this.uriUni = uriUnifier;
         this.xHTMLParser = xHTMLParser;
         this.schedulingStrategy = schedulingStrategy;
+        this.robotsTxtService = robotsTxtService;
     }
 
-    public Vector<Document> crawlAndFollowLinks(Document toCrawl) throws IOException, InterruptedException, ParserConfigurationException, SAXException, XPathExpressionException, URISyntaxException {
+    public Vector<Document> crawlAndFollowLinks(Document toCrawl) throws Exception {
         Vector<Document> results = new Vector<Document>();
 
         HttpResponse headResponse = httpService.getUrlWithHead(toCrawl.getUri());
@@ -61,20 +65,25 @@ public class Service {
         if (isHtml) {
             //do the real request
             System.out.println("Crawling "+toCrawl.getUri().toString());
-            HttpResponse getResponse = httpService.getUriWithGet(toCrawl.getUri());
 
-            StringWriter writer = new StringWriter();
-            IOUtils.copy(getResponse.getEntity().getContent(), writer);
-            String website = writer.toString();
+            if(this.robotsTxtService.isAllowedUri(toCrawl.getUri(),"")) {
+                HttpResponse getResponse = httpService.getUriWithGet(toCrawl.getUri());
 
-            toCrawl.setContent(website);
-            toCrawl.setMimeType(getResponse.getEntity().getContentType().getValue());
-            toCrawl.incrementCrawCount();
+                StringWriter writer = new StringWriter();
+                IOUtils.copy(getResponse.getEntity().getContent(), writer);
+                String website = writer.toString();
 
-            results.add(toCrawl);
-            results = this.prepareLinkedDocuments(results, toCrawl);
+                toCrawl.setContent(website);
+                toCrawl.setMimeType(getResponse.getEntity().getContentType().getValue());
+                toCrawl.incrementCrawCount();
 
-            EntityUtils.consume(getResponse.getEntity());
+                results.add(toCrawl);
+                results = this.prepareLinkedDocuments(results, toCrawl);
+
+                EntityUtils.consume(getResponse.getEntity());
+            } else {
+              System.out.println("Crawl blocked by robots txt");
+            }
         }
 
         return results;
@@ -87,14 +96,16 @@ public class Service {
             try {
                 xHTMLParser.initialize(document.getUri(), document.getContent(), document.getMimeType());
                 URI baseURI = xHTMLParser.getBaseHrefUri();
-                Vector<URI> uris = xHTMLParser.getExternalLinkUris();
+                Vector<Link> links = xHTMLParser.getExternalLinkUris();
                 this.schedulingStrategy.setCurrentPageUri(document.getUri());
 
-                for(URI linkUri : uris) {
-                    if(!(linkUri == null) && linkUri.toString().contains(".de/") ) {
+                for(Link link : links) {
+                    if(!(link == null) && link.getTargetUri().toString().contains(".de/") ) {
 
                         //todo remove query and fragment here, make it more flexible
-                        URI unifiedUri       = this.uriUni.unifiy(linkUri, document.getUri(),baseURI);
+                        URI unifiedUri       = this.uriUni.unifiy(link.getTargetUri(), document.getUri(),baseURI);
+                        link.setTargetUri(unifiedUri);
+
                         URIBuilder builder  = new URIBuilder(unifiedUri);
                         builder.setQuery(null);
                         builder.setFragment(null);
@@ -104,7 +115,7 @@ public class Service {
                         //create a new document from the followed link
                         Document linkDocument = new Document();
 
-                        linkDocument.addIncomingLink(document.getUri().toString());
+                        linkDocument.addIncomingLink(link);
                         linkDocument.setUri(unifiedUri);
 
                         int crawlCountDown = this.schedulingStrategy.getCrawlingCountDown(unifiedUri);

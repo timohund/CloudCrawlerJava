@@ -23,14 +23,23 @@ public class DocumentMergerTest {
         Document document1 = new Document();
         document1.setCrawlingCountdown(0);
         document1.setUri(new URI("http://www.admin-wissen.de/"));
-        document1.addIncomingLink("http://www.facebook.com/");
-        document1.addIncomingLink("http://www.amazon.de");
+
+        Link link1 = new Link();
+        link1.setTargetUri(new URI("http://www.facebook.com/"));
+        document1.addIncomingLink(link1);
+
+        Link link2 = new Link();
+        link2.setTargetUri(new URI("http://www.amazon.de"));
+        document1.addIncomingLink(link2);
 
             //crawled existing document
         Document document2 = new Document();
         document2.incrementCrawCount();
         document2.setUri(new URI("http://www.admin-wissen.de/"));
-        document2.addIncomingLink("http://www.heise.de/");
+
+        Link link3 = new Link();
+        link3.setTargetUri(new URI("http://www.heise.de/"));
+        document2.addIncomingLink(link3);
         document2.incrementLinkAnalyzeCount();
 
 

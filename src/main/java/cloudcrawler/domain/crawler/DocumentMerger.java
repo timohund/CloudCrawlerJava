@@ -40,13 +40,13 @@ public class DocumentMerger {
                 slaveDocument = currentStoredResult;
             }
 
-            HashMap<String,String> links =  slaveDocument.getIncomingLinks();
+            HashMap<String,Link> links =  slaveDocument.getIncomingLinks();
 
             if(links != null) {
                 Iterator iterator = links.keySet().iterator();
                 while(iterator.hasNext()) {
                     String linkKey = iterator.next().toString();
-                    String linkToAdd = links.get(linkKey).toString();
+                    Link linkToAdd = links.get(linkKey);
                     // weiterverabeitung der Werte...
                     masterDocument.addIncomingLink(linkToAdd);
                 }

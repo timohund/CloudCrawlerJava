@@ -10,6 +10,8 @@ import java.util.HashMap;
  */
 public class Document {
 
+    protected String title;
+
     protected URI uri;
 
     protected String content;
@@ -26,8 +28,7 @@ public class Document {
 
     protected int linkAnalyzeCount = 0;
 
-
-    protected HashMap<String,String> incomingLinks = new HashMap<String, String>();
+    protected HashMap<String,Link> incomingLinks = new HashMap<String, Link>();
 
     public URI getUri() {
         return uri;
@@ -53,12 +54,12 @@ public class Document {
         this.mimeType = mimeType;
     }
 
-    public HashMap<String, String> getIncomingLinks() {
+    public HashMap<String, Link> getIncomingLinks() {
         return incomingLinks;
     }
 
-    public void addIncomingLink(String url) {
-        this.incomingLinks.put(url,url);
+    public void addIncomingLink(Link link) {
+        this.incomingLinks.put(link.getTargetUri().toString(),link);
     }
 
     public void incrementLinkAnalyzeCount() {
