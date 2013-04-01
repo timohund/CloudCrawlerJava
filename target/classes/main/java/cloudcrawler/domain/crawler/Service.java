@@ -1,7 +1,6 @@
 package cloudcrawler.domain.crawler;
 
 import cloudcrawler.domain.crawler.contentparser.XHTMLContentParser;
-import cloudcrawler.domain.crawler.robots.RobotsTxtService;
 import cloudcrawler.domain.crawler.schedule.CrawlingScheduleStrategy;
 import cloudcrawler.system.http.HttpService;
 import cloudcrawler.system.uri.URIUnifier;
@@ -42,10 +41,10 @@ public class Service {
 
     protected CrawlingScheduleStrategy schedulingStrategy;
 
-    protected RobotsTxtService robotsTxtService;
+    protected cloudcrawler.domain.crawler.robotstxt.Service robotsTxtService;
 
     @Inject
-    public Service(HttpService httpService, URIUnifier uriUnifier, XHTMLContentParser xHTMLParser, CrawlingScheduleStrategy schedulingStrategy, RobotsTxtService robotsTxtService) {
+    public Service(HttpService httpService, URIUnifier uriUnifier, XHTMLContentParser xHTMLParser, CrawlingScheduleStrategy schedulingStrategy, cloudcrawler.domain.crawler.robotstxt.Service robotsTxtService) {
         this.httpService = httpService;
         this.uriUni = uriUnifier;
         this.xHTMLParser = xHTMLParser;
@@ -82,7 +81,7 @@ public class Service {
 
                 EntityUtils.consume(getResponse.getEntity());
             } else {
-              System.out.println("Crawl blocked by robots txt");
+              System.out.println("Crawl blocked by robotstxt txt");
             }
         }
 

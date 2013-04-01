@@ -5,6 +5,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 
@@ -13,6 +14,8 @@ import java.net.URI;
 
 public class HttpService {
 
+    String userAgent = "Ranktacle Robot";
+
     HttpClient client;
 
     public HttpService() {
@@ -20,6 +23,8 @@ public class HttpService {
         HttpParams httpParam = client.getParams();
         HttpConnectionParams.setConnectionTimeout(httpParam, 10 * 1000);
         HttpConnectionParams.setSoTimeout(httpParam, 10 * 1000);
+
+        client.getParams().setParameter(CoreProtocolPNames.USER_AGENT, userAgent);
     }
 
     /**
@@ -32,6 +37,7 @@ public class HttpService {
         HttpHead headRequest;
 
         headRequest = new HttpHead();
+        headRequest.setHeader("Referer","http://www.ranktacle.com/");
         headRequest.setURI(uri);
 
         return client.execute(headRequest);
@@ -47,8 +53,18 @@ public class HttpService {
         HttpGet getRequest;
 
         getRequest = new HttpGet();
+        getRequest.setHeader("Referer","http://www.ranktacle.com/");
+
         getRequest.setURI(uri);
 
         return client.execute(getRequest);
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
     }
 }

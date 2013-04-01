@@ -1,14 +1,15 @@
 package cloudcrawler.domain.crawler.message;
 
+/**
+ * Message class that contains a crawled document as
+ * subject. This message is send be the crawling mapper to the reducer
+ * to handle crawled documents.
+ *
+ * @author Timo Schmidt <timo-schmidt@gmx.net>
+ */
+
 import cloudcrawler.domain.crawler.Document;
 
-/**
- * Created with IntelliJ IDEA.
- * User: timo
- * Date: 30.03.13
- * Time: 08:26
- * To change this template use File | Settings | File Templates.
- */
 public class DocumentMessage extends Message {
 
     protected Document attachment;
