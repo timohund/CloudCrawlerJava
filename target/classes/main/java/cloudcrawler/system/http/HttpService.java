@@ -14,7 +14,7 @@ import java.net.URI;
 
 public class HttpService {
 
-    String userAgent = "Ranktacle Robot";
+    String userAgent = "Ernst 2.0";
 
     HttpClient client;
 
@@ -37,7 +37,7 @@ public class HttpService {
         HttpHead headRequest;
 
         headRequest = new HttpHead();
-        headRequest.setHeader("Referer","http://www.ranktacle.com/");
+      //  headRequest.setHeader("Referer","http://www.ranktacle.com/");
         headRequest.setURI(uri);
 
         return client.execute(headRequest);
@@ -53,10 +53,18 @@ public class HttpService {
         HttpGet getRequest;
 
         getRequest = new HttpGet();
-        getRequest.setHeader("Referer","http://www.ranktacle.com/");
+        //getRequest.setHeader("Referer","http://www.ranktacle.com/");
 
         getRequest.setURI(uri);
 
         return client.execute(getRequest);
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
     }
 }

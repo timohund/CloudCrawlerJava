@@ -56,7 +56,6 @@ public class Service {
      * allowed to be crawled against the robots.txt of the website.
      *
      * @param uri
-     * @param userAgent
      * @return
      * @throws Exception
      */

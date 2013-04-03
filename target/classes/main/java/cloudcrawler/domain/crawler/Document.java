@@ -59,7 +59,7 @@ public class Document {
     }
 
     public void addIncomingLink(Link link) {
-        this.incomingLinks.put(link.getTargetUri().toString(),link);
+        this.incomingLinks.put(link.getSourceUri().toString(),link);
     }
 
     public void incrementLinkAnalyzeCount() {

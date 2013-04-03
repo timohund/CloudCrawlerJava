@@ -23,7 +23,7 @@ import java.util.Vector;
 /**
  * The crawling service is responsible to create
  * crawled object for a given URI.
- *
+ * <p/>
  * It returns a collection of documents.
  * This collection contains the requested document
  * with all crawling information and Crawling documents for all
@@ -55,17 +55,18 @@ public class Service {
     public Vector<Document> crawlAndFollowLinks(Document toCrawl) throws Exception {
         Vector<Document> results = new Vector<Document>();
 
-        HttpResponse headResponse = httpService.getUrlWithHead(toCrawl.getUri());
-        Header header = headResponse.getLastHeader(new String("Content-Type"));
-        Boolean isHtml = header.getValue().contains(new String("text/html"));
-        //close connection
-        EntityUtils.consume(headResponse.getEntity());
+        if (this.robotsTxtService.isAllowedUri(toCrawl.getUri())) {
 
-        if (isHtml) {
-            //do the real request
-            System.out.println("Crawling "+toCrawl.getUri().toString());
+            HttpResponse headResponse = httpService.getUrlWithHead(toCrawl.getUri());
+            Header header = headResponse.getLastHeader(new String("Content-Type"));
+            Boolean isHtml = header.getValue().contains(new String("text/html"));
+            //close connection
+            EntityUtils.consume(headResponse.getEntity());
 
-            if(this.robotsTxtService.isAllowedUri(toCrawl.getUri())) {
+            if (isHtml) {
+                //do the real request
+                System.out.println("Crawling " + toCrawl.getUri().toString());
+
                 HttpResponse getResponse = httpService.getUriWithGet(toCrawl.getUri());
 
                 StringWriter writer = new StringWriter();
@@ -80,35 +81,37 @@ public class Service {
                 results = this.prepareLinkedDocuments(results, toCrawl);
 
                 EntityUtils.consume(getResponse.getEntity());
-            } else {
-              System.out.println("Crawl blocked by robotstxt txt");
             }
+
+        } else {
+            System.out.println("Crawl blocked by robotstxt txt");
         }
 
         return results;
     }
 
 
-    protected Vector<Document> prepareLinkedDocuments(Vector<Document> result, Document document)  {
+    protected Vector<Document> prepareLinkedDocuments(Vector<Document> result, Document document) {
         int analyzeCount = document.getLinkAnalyzeCount();
-        if(analyzeCount == 0 ) {
+        if (analyzeCount == 0) {
             try {
                 xHTMLParser.initialize(document.getUri(), document.getContent(), document.getMimeType());
                 URI baseURI = xHTMLParser.getBaseHrefUri();
                 Vector<Link> links = xHTMLParser.getExternalLinkUris();
                 this.schedulingStrategy.setCurrentPageUri(document.getUri());
 
-                for(Link link : links) {
-                    if(!(link == null) && link.getTargetUri().toString().contains(".de/") ) {
+                for (Link link : links) {
+                    if (!(link == null) && link.getTargetUri().toString().contains(".de/")) {
 
                         //todo remove query and fragment here, make it more flexible
-                        URI unifiedUri       = this.uriUni.unifiy(link.getTargetUri(), document.getUri(),baseURI);
+                        URI unifiedUri = this.uriUni.unifiy(link.getTargetUri(), document.getUri(), baseURI);
                         link.setTargetUri(unifiedUri);
+                        link.setSourceUri(document.getUri());
 
-                        URIBuilder builder  = new URIBuilder(unifiedUri);
+                        URIBuilder builder = new URIBuilder(unifiedUri);
                         builder.setQuery(null);
                         builder.setFragment(null);
-                        unifiedUri           = builder.build();
+                        unifiedUri = builder.build();
 
 
                         //create a new document from the followed link

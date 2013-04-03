@@ -55,7 +55,7 @@ public class XHTMLContentParser extends XMLContentParser {
         for (int i = 0; i < nodes.getLength(); i++) {
             Node aNode = nodes.item(i);
             URI aHrefUri    = getUriFromHrefNode(aNode);
-            String linkText = aNode.getTextContent();
+            String linkText = aNode.getTextContent().trim();
             Link link = new Link();
 
             link.setTargetUri(aHrefUri);

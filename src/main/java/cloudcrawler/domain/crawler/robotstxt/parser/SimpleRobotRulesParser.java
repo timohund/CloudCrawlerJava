@@ -19,8 +19,6 @@ package cloudcrawler.domain.crawler.robotstxt.parser;
 
 import cloudcrawler.domain.crawler.robotstxt.rules.BaseRobotRules;
 import cloudcrawler.domain.crawler.robotstxt.rules.SimpleRobotRules;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -35,7 +33,6 @@ import java.util.regex.Pattern;
 
 @SuppressWarnings("serial")
 public class SimpleRobotRulesParser extends BaseRobotsParser {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleRobotRulesParser.class);
 
     private enum RobotDirective {
         USER_AGENT,
@@ -342,16 +339,8 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         boolean hasHTML = false;
         if (isHtmlType || SIMPLE_HTML_PATTERN.matcher(contentAsStr).find()) {
             if (!USER_AGENT_PATTERN.matcher(contentAsStr).find()) {
-                LOGGER.trace("Found non-robotstxt.txt HTML file: " + url);
                 return new SimpleRobotRules(SimpleRobotRules.RobotRulesMode.ALLOW_ALL);
             } else {
-                // We'll try to strip out HTML tags below.
-                if (isHtmlType) {
-                    LOGGER.debug("HTML content type returned for robotstxt.txt file: " + url);
-                } else {
-                    LOGGER.debug("Found HTML in robotstxt.txt file: " + url);
-                }
-
                 hasHTML = true;
             }
         }
@@ -411,12 +400,10 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                     break;
 
                 case UNKNOWN:
-                    reportWarning("Unknown directive in robotstxt.txt file: " + line, url);
                     parseState.setFinishedAgentFields(true);
                     break;
 
                 case MISSING:
-                    reportWarning(String.format("Unknown line in robotstxt.txt file (size %d): %s", content.length, line), url);
                     parseState.setFinishedAgentFields(true);
                     break;
 
@@ -433,22 +420,9 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         if (result.getCrawlDelay() > MAX_CRAWL_DELAY) {
             // Some evil sites use a value like 3600 (seconds) for the crawl delay, which would
             // cause lots of problems for us.
-            LOGGER.debug("Crawl delay exceeds max value - so disallowing all URLs: " + url);
             return new SimpleRobotRules(SimpleRobotRules.RobotRulesMode.ALLOW_NONE);
         } else {
             return result;
-        }
-    }
-
-    private void reportWarning(String msg, String url) {
-        _numWarnings += 1;
-
-        if (_numWarnings == 1) {
-            LOGGER.warn("Problem processing robotstxt.txt for " + url);
-        }
-
-        if (_numWarnings < MAX_WARNINGS) {
-            LOGGER.warn("\t" + msg);
         }
     }
 
@@ -535,7 +509,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                 state.addRule(path, false);
             }
         } catch (Exception e) {
-            reportWarning("Error parsing robotstxt rules - can't decode path: " + path, state.getUrl());
+            System.out.println("Error parsing robotstxt rules - can't decode path: " + path);
         }
 
         return true;
@@ -560,7 +534,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
         try {
             path = URLDecoder.decode(path, "UTF-8");
         } catch (Exception e) {
-            reportWarning("Error parsing robotstxt rules - can't decode path: " + path, state.getUrl());
+            System.out.println("Error parsing robotstxt rules - can't decode path: " + path);
         }
 
         if (path.length() == 0) {
@@ -599,7 +573,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                     state.setCrawlDelay(delayValue);
                 }
             } catch (Exception e) {
-                reportWarning("Error parsing robotstxt rules - can't decode crawl delay: " + delayString, state.getUrl());
+                System.out.println("Error parsing robotstxt rules - can't decode crawl delay: " + delayString);
             }
         }
 
@@ -625,7 +599,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                 }
             }
         } catch (Exception e) {
-            reportWarning("Invalid URL with sitemap directive: " + sitemap, state.getUrl());
+            System.out.println("Invalid URL with sitemap directive: " + sitemap);
         }
 
         return true;
@@ -645,7 +619,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
             RobotToken fixedToken = new RobotToken(RobotDirective.SITEMAP, "http:" + token.getData());
             return handleSitemap(state, fixedToken);
         } else {
-            reportWarning("Found raw non-sitemap URL: http:" + urlFragment, state.getUrl());
+            System.out.println("Found raw non-sitemap URL: http:" + urlFragment);
             return true;
         }
     }

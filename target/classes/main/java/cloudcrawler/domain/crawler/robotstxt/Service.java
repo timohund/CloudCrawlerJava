@@ -56,11 +56,10 @@ public class Service {
      * allowed to be crawled against the robots.txt of the website.
      *
      * @param uri
-     * @param userAgent
      * @return
      * @throws Exception
      */
-    public boolean isAllowedUri(URI uri, String userAgent) throws Exception {
+    public boolean isAllowedUri(URI uri) throws Exception {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme(uri.getScheme());
         uriBuilder.setHost(uri.getHost());
@@ -94,7 +93,7 @@ public class Service {
                             uri.toString(),
                             writer.toString().getBytes(),
                             response.getEntity().getContentType().getValue(),
-                            userAgent);
+                            httpService.getUserAgent());
 
                 }
             } catch (Exception e) {

@@ -13,6 +13,8 @@ public class Link {
 
     URI targetUri;
 
+    URI sourceUri;
+
     String text = "";
 
     public URI getTargetUri() {
@@ -21,6 +23,14 @@ public class Link {
 
     public void setTargetUri(URI targetUri) {
         this.targetUri = targetUri;
+    }
+
+    public URI getSourceUri() {
+        return sourceUri;
+    }
+
+    public void setSourceUri(URI sourceUri) {
+        this.sourceUri = sourceUri;
     }
 
     public String getText() {
