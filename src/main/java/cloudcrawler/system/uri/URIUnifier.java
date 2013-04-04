@@ -49,6 +49,12 @@ public class URIUnifier {
             builder.setPath("/");
             result = builder.build();
         }
-        return result;
+
+            //make at leaste scheme and hostname lowercase
+        URIBuilder builder = new URIBuilder(result);
+        builder.setScheme(result.getScheme().toLowerCase());
+        builder.setHost(result.getHost().toLowerCase());
+
+        return builder.build();
     }
 }
