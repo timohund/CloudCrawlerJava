@@ -3,6 +3,7 @@ package cloudcrawler.mapreduce;
 import cloudcrawler.domain.crawler.Document;
 import cloudcrawler.domain.crawler.DocumentMerger;
 import cloudcrawler.domain.crawler.message.DocumentMessage;
+import cloudcrawler.domain.crawler.schedule.CrawlingScheduleStrategy;
 import cloudcrawler.ioc.CloudCrawlerModule;
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
@@ -23,10 +24,13 @@ public class CrawlingReducer extends Reducer<Text, Text, Text, Text> {
 
     protected DocumentMerger merger;
 
+    protected CrawlingScheduleStrategy crawlingScheduler;
+
     public CrawlingReducer() {
         injector = Guice.createInjector(new CloudCrawlerModule());
         this.setGson(injector.getInstance(Gson.class));
         this.setMerger(injector.getInstance(DocumentMerger.class));
+        this.setCrawlingScheduler(injector.getInstance(CrawlingScheduleStrategy.class));
     }
 
     public void setGson(Gson gson) {
@@ -35,6 +39,10 @@ public class CrawlingReducer extends Reducer<Text, Text, Text, Text> {
 
     public void setMerger(DocumentMerger merger) {
         this.merger = merger;
+    }
+
+    public void setCrawlingScheduler(CrawlingScheduleStrategy crawlingScheduler) {
+        this.crawlingScheduler = crawlingScheduler;
     }
 
     /**
@@ -75,11 +83,19 @@ public class CrawlingReducer extends Reducer<Text, Text, Text, Text> {
         }
     }
 
-    protected void emitAll(HashMap<String,Document> mergeResult,Context context) throws IOException, InterruptedException {
+    protected void emitAll(HashMap<String,Document> mergeResult,Context context) throws Exception {
         Iterator it = mergeResult.keySet().iterator();
         while(it.hasNext()) {
             String url = it.next().toString();
             Document document = mergeResult.get(url);
+
+            if(document.getCrawlingState() == Document.CRAWLING_STATE_SCHEDULED) {
+                throw new Exception("An document should never leave the crawling mapper in a scheduled state");
+            } else if(document.getCrawlingState() == Document.CRAWLING_STATE_WAITING) {
+                int nextState = crawlingScheduler.getNextCrawlingState(document.getUri());
+                document.setCrawlingState(nextState);
+            }
+
             DocumentMessage documentMessage = new DocumentMessage();
             documentMessage.setAttachment(document);
             String documentMessageJson = " "+gson.toJson(documentMessage);

@@ -87,7 +87,10 @@ public class CrawlingMapper extends Mapper<Text, Text, Text, Text> {
 
 
                 //reconstitute the object or assign the uri
-            if (!value.toString().trim().equals("") ) {
+            if (value.toString().trim().equals("") ) {
+                    //new document from the input file without json are allways scheduled directly
+                crawled.setCrawlingState(Document.CRAWLING_STATE_SCHEDULED);
+            } else {
                 currentDocumentCrawlMessage = gson.fromJson(value.toString(),DocumentMessage.class);
                 crawled = currentDocumentCrawlMessage.getAttachment();
             }
@@ -99,7 +102,7 @@ public class CrawlingMapper extends Mapper<Text, Text, Text, Text> {
 
                 if(crawled != null) {
                     if(crawled.getCrawlCount() == 0 && crawled.getErrorCount() < 2) {
-                        if(crawled.getCrawlingCountdown() == 0) {
+                        if(crawled.getCrawlingState()== Document.CRAWLING_STATE_SCHEDULED) {
                             //Thread.sleep(100);
                             Vector<Document> crawlingResults = crawlingService.crawlAndFollowLinks(crawled);
 
@@ -116,7 +119,6 @@ public class CrawlingMapper extends Mapper<Text, Text, Text, Text> {
                                 context.write(crawlingResultKey, crawlingResultValue);
                             }
                         } else {
-                            crawled.decrementCrawlingCountdown();
                                 //repost the document
                             String json = gson.toJson(currentDocumentCrawlMessage);
                             Text crawlingResultValue = new Text(json.toString());

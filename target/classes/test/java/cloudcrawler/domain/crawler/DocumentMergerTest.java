@@ -21,7 +21,7 @@ public class DocumentMergerTest {
     public void canMergeSameDomainDocument() throws IOException, URISyntaxException, InterruptedException {
 
         Document document1 = new Document();
-        document1.setCrawlingCountdown(0);
+        document1.setCrawlingState(Document.CRAWLING_STATE_CRAWLED);
         document1.setUri(new URI("http://www.admin-wissen.de/"));
 
         Link link1 = new Link();

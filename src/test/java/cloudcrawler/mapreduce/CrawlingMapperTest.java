@@ -49,6 +49,7 @@ public class CrawlingMapperTest {
             document.incrementErrorCount();
             document.setUri(new URI("http://www.heise.de/"));
             document.setErrorMessage("test exception");
+            document.setCrawlingState(Document.CRAWLING_STATE_SCHEDULED);
 
             Text keyOut     = new Text(document.getUri().toString());
             Text valueOut   = new Text(gson.toJson(expectedOutputMessage));

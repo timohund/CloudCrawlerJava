@@ -3,7 +3,7 @@ package cloudcrawler.ioc;
 import cloudcrawler.domain.crawler.robotstxt.cache.Cache;
 import cloudcrawler.domain.crawler.robotstxt.cache.MemCache;
 import cloudcrawler.domain.crawler.schedule.CrawlingScheduleStrategy;
-import cloudcrawler.domain.crawler.schedule.ForeignLinksFirstStrategy;
+import cloudcrawler.domain.crawler.schedule.FixedAmountPerRunStrategy;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
@@ -18,7 +18,7 @@ public class CloudCrawlerModule implements Module {
 
     @Override
     public void configure(Binder binder) {
-        binder.bind(CrawlingScheduleStrategy.class).to(ForeignLinksFirstStrategy.class);
+        binder.bind(CrawlingScheduleStrategy.class).to(FixedAmountPerRunStrategy.class);
         binder.bind(Cache.class).to(MemCache.class);
     }
 }

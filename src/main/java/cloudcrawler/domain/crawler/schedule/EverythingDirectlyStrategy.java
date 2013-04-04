@@ -1,5 +1,7 @@
 package cloudcrawler.domain.crawler.schedule;
 
+import cloudcrawler.domain.crawler.Document;
+
 import java.net.URI;
 
 /**
@@ -12,10 +14,7 @@ import java.net.URI;
 public class EverythingDirectlyStrategy implements CrawlingScheduleStrategy {
 
     @Override
-    public void setCurrentPageUri(URI currentPageUri) {}
-
-    @Override
-    public int getCrawlingCountDown(URI linkTargetUri) {
-        return 0;  //To change body of implemented methods use File | Settings | File Templates.
+    public int getNextCrawlingState(URI linkTargetUri) {
+        return Document.CRAWLING_STATE_SCHEDULED;
     }
 }

@@ -10,6 +10,10 @@ import java.util.HashMap;
  */
 public class Document {
 
+    public static final int CRAWLING_STATE_WAITING      = 0;
+    public static final int CRAWLING_STATE_SCHEDULED    = 1;
+    public static final int CRAWLING_STATE_CRAWLED      = 2;
+
     protected String title;
 
     protected URI uri;
@@ -24,11 +28,7 @@ public class Document {
 
     protected String errorMessage;
 
-    /**
-     * Crawling countdown is used to craw pages not directly.
-     * It will be set and decreased and when it's 0 the page will be crawled.
-     */
-    protected int crawlingCountdown = 0;
+    protected int crawlingState = CRAWLING_STATE_WAITING;
 
     protected int linkAnalyzeCount = 0;
 
@@ -82,18 +82,6 @@ public class Document {
         return this.crawCount;
     }
 
-    public int getCrawlingCountdown() {
-        return crawlingCountdown;
-    }
-
-    public void setCrawlingCountdown(int crawlingCountdown) {
-        this.crawlingCountdown = crawlingCountdown;
-    }
-
-    public void decrementCrawlingCountdown() {
-        this.crawlingCountdown--;
-    }
-
     public int getErrorCount() {
         return errorCount;
     }
@@ -108,5 +96,13 @@ public class Document {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    public void setCrawlingState(int crawlingState) {
+        this.crawlingState = crawlingState;
+    }
+
+    public int getCrawlingState() {
+        return crawlingState;
     }
 }

@@ -39,8 +39,6 @@ public class Service {
 
     protected XHTMLContentParser xHTMLParser;
 
-    protected CrawlingScheduleStrategy schedulingStrategy;
-
     protected cloudcrawler.domain.crawler.robotstxt.Service robotsTxtService;
 
     @Inject
@@ -48,7 +46,6 @@ public class Service {
         this.httpService = httpService;
         this.uriUni = uriUnifier;
         this.xHTMLParser = xHTMLParser;
-        this.schedulingStrategy = schedulingStrategy;
         this.robotsTxtService = robotsTxtService;
     }
 
@@ -69,6 +66,7 @@ public class Service {
 
                 HttpResponse getResponse = httpService.getUriWithGet(toCrawl.getUri());
                 toCrawl.incrementCrawCount();
+                toCrawl.setCrawlingState(Document.CRAWLING_STATE_CRAWLED);
 
                 StringWriter writer = new StringWriter();
                 IOUtils.copy(getResponse.getEntity().getContent(), writer);
@@ -78,6 +76,7 @@ public class Service {
                 toCrawl.setMimeType(getResponse.getEntity().getContentType().getValue());
 
                 results.add(toCrawl);
+
                 results = this.prepareLinkedDocuments(results, toCrawl);
 
                 EntityUtils.consume(getResponse.getEntity());
@@ -98,7 +97,6 @@ public class Service {
                 xHTMLParser.initialize(document.getUri(), document.getContent(), document.getMimeType());
                 URI baseURI = xHTMLParser.getBaseHrefUri();
                 Vector<Link> links = xHTMLParser.getExternalLinkUris();
-                this.schedulingStrategy.setCurrentPageUri(document.getUri());
 
                 for (Link link : links) {
                     if (!(link == null) && link.getTargetUri().toString().contains(".de/")) {
@@ -119,9 +117,7 @@ public class Service {
 
                         linkDocument.addIncomingLink(link);
                         linkDocument.setUri(unifiedUri);
-
-                        int crawlCountDown = this.schedulingStrategy.getCrawlingCountDown(unifiedUri);
-                        linkDocument.setCrawlingCountdown(crawlCountDown);
+                        linkDocument.setCrawlingState(Document.CRAWLING_STATE_WAITING);
 
                         result.add(linkDocument);
                     }
