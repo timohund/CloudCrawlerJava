@@ -20,6 +20,10 @@ public class Document {
 
     protected int crawCount = 0;
 
+    protected int errorCount = 0;
+
+    protected String errorMessage;
+
     /**
      * Crawling countdown is used to craw pages not directly.
      * It will be set and decreased and when it's 0 the page will be crawled.
@@ -74,9 +78,6 @@ public class Document {
         this.crawCount++;
     }
 
-    /**
-     * @return int
-     */
     public int getCrawlCount() {
         return this.crawCount;
     }
@@ -91,5 +92,21 @@ public class Document {
 
     public void decrementCrawlingCountdown() {
         this.crawlingCountdown--;
+    }
+
+    public int getErrorCount() {
+        return errorCount;
+    }
+
+    public void incrementErrorCount() {
+        this.errorCount++;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 }

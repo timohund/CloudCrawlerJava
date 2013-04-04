@@ -68,6 +68,7 @@ public class Service {
                 System.out.println("Crawling " + toCrawl.getUri().toString());
 
                 HttpResponse getResponse = httpService.getUriWithGet(toCrawl.getUri());
+                toCrawl.incrementCrawCount();
 
                 StringWriter writer = new StringWriter();
                 IOUtils.copy(getResponse.getEntity().getContent(), writer);
@@ -75,7 +76,6 @@ public class Service {
 
                 toCrawl.setContent(website);
                 toCrawl.setMimeType(getResponse.getEntity().getContentType().getValue());
-                toCrawl.incrementCrawCount();
 
                 results.add(toCrawl);
                 results = this.prepareLinkedDocuments(results, toCrawl);
