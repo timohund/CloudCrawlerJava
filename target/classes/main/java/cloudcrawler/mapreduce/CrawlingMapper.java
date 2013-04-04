@@ -41,6 +41,16 @@ public class CrawlingMapper extends Mapper<Text, Text, Text, Text> {
 
     /**
      *
+     * @param gson
+     * @param service
+     */
+    public CrawlingMapper(Gson gson, Service service) {
+        this.setGson(gson);
+        this.setCrawlingService(service);
+    }
+
+    /**
+     *
      * @param message
      * @param key
      * @param context
