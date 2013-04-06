@@ -3,14 +3,17 @@ package cloudcrawler.domain.crawler.contentparser;
 import cloudcrawler.domain.crawler.Link;
 import nu.validator.htmlparser.common.Heuristics;
 import nu.validator.htmlparser.dom.HtmlDocumentBuilder;
+import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -31,15 +34,21 @@ public class XHTMLContentParser extends XMLContentParser {
 
     @Override
     protected void afterInitialize() throws ParserConfigurationException, IOException, SAXException {
-        InputStream stream = new ByteArrayInputStream(this.sourceContent.getBytes("UTF-8"));
+        InputStream stream = IOUtils.toInputStream(this.sourceContent);
 
         // Use the TagSoup parser to build an XOM document from HTML
         HtmlDocumentBuilder docBuilder = new HtmlDocumentBuilder();
+
         docBuilder.setReportingDoctype(true);
         docBuilder.setHtml4ModeCompatibleWithXhtml1Schemata(true);
-        docBuilder.setHeuristics(Heuristics.ALL);
-        document = docBuilder.parse(stream);
+        docBuilder.setHeuristics(Heuristics.NONE);
+
+        InputSource in = new InputSource(stream);
+        in.setEncoding("UTF-8");
+
+        document = docBuilder.parse(in);
     }
+
     /**
      * Retrieves the external links of an html document.
      *
@@ -111,5 +120,22 @@ public class XHTMLContentParser extends XMLContentParser {
             //can happen
         }
         return aHref;
+    }
+
+    private class SystemErrorHandler implements ErrorHandler {
+        @Override
+        public void warning(SAXParseException exception) throws SAXException {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        @Override
+        public void error(SAXParseException exception) throws SAXException {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        @Override
+        public void fatalError(SAXParseException exception) throws SAXException {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
     }
 }

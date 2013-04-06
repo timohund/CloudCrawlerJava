@@ -5,6 +5,8 @@ import cloudcrawler.domain.crawler.schedule.CrawlingScheduleStrategy;
 import cloudcrawler.system.http.HttpService;
 import cloudcrawler.system.uri.URIUnifier;
 import com.google.inject.Inject;
+import com.ibm.icu.text.CharsetDetector;
+import com.ibm.icu.text.CharsetMatch;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -14,11 +16,12 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
-import java.io.IOException;
-import java.io.StringWriter;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The crawling service is responsible to create
@@ -49,6 +52,7 @@ public class Service {
         this.robotsTxtService = robotsTxtService;
     }
 
+
     public Vector<Document> crawlAndFollowLinks(Document toCrawl) throws Exception {
         Vector<Document> results = new Vector<Document>();
 
@@ -68,15 +72,25 @@ public class Service {
                 toCrawl.incrementCrawCount();
                 toCrawl.setCrawlingState(Document.CRAWLING_STATE_CRAWLED);
 
-                StringWriter writer = new StringWriter();
-                IOUtils.copy(getResponse.getEntity().getContent(), writer);
-                String website = writer.toString();
+
+                BufferedInputStream is = new BufferedInputStream(getResponse.getEntity().getContent());
+                CharsetDetector charsetDetector = new CharsetDetector();
+                charsetDetector.setText(is);
+                CharsetMatch match = charsetDetector.detect();
+
+                byte[] bytes    = IOUtils.toByteArray(is);
+                byte[] utf8     = new String(bytes, match.getName()).getBytes("UTF-8");
+                String website  = new String(utf8,"UTF-8");
+
+                Pattern regex = Pattern.compile("(<meta.*?charset=[^\"']+(\"|')[^>]*>)",Pattern.CASE_INSENSITIVE);
+                Matcher regexMatcher = regex.matcher(website);
+                website = regexMatcher.replaceAll("");
 
                 toCrawl.setContent(website);
                 toCrawl.setMimeType(getResponse.getEntity().getContentType().getValue());
 
-                results.add(toCrawl);
 
+                results.add(toCrawl);
                 results = this.prepareLinkedDocuments(results, toCrawl);
 
                 EntityUtils.consume(getResponse.getEntity());
@@ -111,7 +125,6 @@ public class Service {
                         builder.setFragment(null);
                         unifiedUri = builder.build();
 
-
                         //create a new document from the followed link
                         Document linkDocument = new Document();
 
@@ -124,7 +137,6 @@ public class Service {
                 }
 
                 document.incrementLinkAnalyzeCount();
-                document.setContent("");
 
             } catch (IOException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.

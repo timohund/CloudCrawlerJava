@@ -49,7 +49,7 @@ public class CrawlingMapperTest {
             document.incrementErrorCount();
             document.setUri(new URI("http://www.heise.de/"));
             document.setErrorMessage("test exception");
-            document.setCrawlingState(Document.CRAWLING_STATE_SCHEDULED);
+            document.setCrawlingState(Document.CRAWLING_STATE_ERROR);
 
             Text keyOut     = new Text(document.getUri().toString());
             Text valueOut   = new Text(gson.toJson(expectedOutputMessage));
@@ -66,6 +66,9 @@ public class CrawlingMapperTest {
 
             Text key     = new Text(document.getUri().toString());
             Text value   = new Text();
+
+                //to process the document it need to be scheduled before
+            document.setCrawlingState(Document.CRAWLING_STATE_SCHEDULED);
             mapper.map(key,value, contextMock);
 
         verify(crawlingServiceMock);

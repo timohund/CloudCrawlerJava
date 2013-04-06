@@ -21,6 +21,7 @@ public class HttpService {
     public HttpService() {
         client = new DefaultHttpClient() ;
         HttpParams httpParam = client.getParams();
+
         HttpConnectionParams.setConnectionTimeout(httpParam, 10 * 1000);
         HttpConnectionParams.setSoTimeout(httpParam, 10 * 1000);
 

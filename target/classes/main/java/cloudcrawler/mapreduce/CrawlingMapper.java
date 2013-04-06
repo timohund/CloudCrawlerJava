@@ -133,7 +133,10 @@ public class CrawlingMapper extends Mapper<Text, Text, Text, Text> {
                 }
             } catch (Exception e) {
                 if(currentDocumentCrawlMessage != null) {
+                    currentDocumentCrawlMessage.getAttachment().setCrawlingState(Document.CRAWLING_STATE_ERROR);
                     handleDocumentException(currentDocumentCrawlMessage,key,context, e);
+                    e.printStackTrace();
+
                 } else {
                     System.out.println(e.getMessage());
                     e.printStackTrace();

@@ -27,20 +27,24 @@ public class XHTMLContentParserTest extends AbstractTest {
 
     String expectedBaseHref;
 
-    public XHTMLContentParserTest(String fixtureName, String fixtureUri, String expectedBaseHref) throws URISyntaxException {
+    String firstLinkLabel;
+
+    public XHTMLContentParserTest(String fixtureName, String fixtureUri, String expectedBaseHref, String firstLinkLabel) throws URISyntaxException {
         this.fixtureName = fixtureName;
         this.fixtureUri = new URI(fixtureUri);
         this.expectedBaseHref = expectedBaseHref;
+        this.firstLinkLabel = firstLinkLabel;
     }
 
 
     @Parameterized.Parameters
     public static Collection urisToUnify() {
         return Arrays.asList(new Object[][]{
-                {"simpleFixture.html", "", "http://www.google.de/"},
-                {"admin-wissen.de.html", "http://www.admin-wissen.de/", "http://www.admin-wissen.de/"},
-                {"microsoft.de.html", "http://www.microsoft.de/", ""},
-                {"aldi.de.html", "http://www.aldi.de/", ""},
+                {"simpleFixture.html", "", "http://www.google.de/","üüü"},
+                {"admin-wissen.de.html", "http://www.admin-wissen.de/", "http://www.admin-wissen.de/","Home"},
+                {"microsoft.de.html", "http://www.microsoft.de/", "","Menu"},
+                {"aldi.de.html", "http://www.aldi.de/", "","Australia"},
+        //        {"iso8859.html","http://www.test.de/","",""}
 
 
         });
@@ -60,5 +64,7 @@ public class XHTMLContentParserTest extends AbstractTest {
 
         Assert.assertEquals(this.expectedBaseHref,baseUrl);
         Assert.assertTrue(parser.getExternalLinkUris().size() > 0);
+        Assert.assertEquals(parser.getExternalLinkUris().get(0).getText(),this.firstLinkLabel);
     }
+
 }

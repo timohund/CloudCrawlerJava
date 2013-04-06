@@ -13,6 +13,7 @@ public class Document {
     public static final int CRAWLING_STATE_WAITING      = 0;
     public static final int CRAWLING_STATE_SCHEDULED    = 1;
     public static final int CRAWLING_STATE_CRAWLED      = 2;
+    public static final int CRAWLING_STATE_ERROR        = 3;
 
     protected String title;
 
