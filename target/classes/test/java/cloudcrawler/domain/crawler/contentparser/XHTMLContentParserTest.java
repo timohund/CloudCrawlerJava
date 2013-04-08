@@ -44,15 +44,12 @@ public class XHTMLContentParserTest extends AbstractTest {
                 {"admin-wissen.de.html", "http://www.admin-wissen.de/", "http://www.admin-wissen.de/","Home"},
                 {"microsoft.de.html", "http://www.microsoft.de/", "","Menu"},
                 {"aldi.de.html", "http://www.aldi.de/", "","Australia"},
-        //        {"iso8859.html","http://www.test.de/","",""}
-
-
         });
     }
 
     @Test
     public void xHTMLExtractionTest() throws IOException, URISyntaxException, ParserConfigurationException, SAXException, XPathExpressionException {
-        File file = new File("src/test/fixtures/"+this.fixtureName);
+        File file = new File("src/test/fixtures/websites/"+this.fixtureName);
         String content = FileUtils.readFileToString(file);
 
         String mimeType = new String("text/html");

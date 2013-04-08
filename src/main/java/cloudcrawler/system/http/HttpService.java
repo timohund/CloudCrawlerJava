@@ -19,6 +19,10 @@ public class HttpService {
     HttpClient client;
 
     public HttpService() {
+        this.init();
+    }
+
+    protected void init() {
         client = new DefaultHttpClient() ;
         HttpParams httpParam = client.getParams();
 
@@ -26,11 +30,12 @@ public class HttpService {
         HttpConnectionParams.setSoTimeout(httpParam, 10 * 1000);
 
         client.getParams().setParameter(CoreProtocolPNames.USER_AGENT, userAgent);
+
     }
 
-
-    public void closeAllConnections() {
+    public void reset() {
         client.getConnectionManager().shutdown();
+        this.init();
     }
 
     /**
