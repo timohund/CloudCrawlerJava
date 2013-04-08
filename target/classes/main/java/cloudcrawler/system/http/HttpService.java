@@ -28,6 +28,11 @@ public class HttpService {
         client.getParams().setParameter(CoreProtocolPNames.USER_AGENT, userAgent);
     }
 
+
+    public void closeAllConnections() {
+        client.getConnectionManager().shutdown();
+    }
+
     /**
      *
      * @param uri

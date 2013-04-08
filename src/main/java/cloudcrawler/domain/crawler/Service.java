@@ -52,55 +52,81 @@ public class Service {
         this.robotsTxtService = robotsTxtService;
     }
 
-
     public Vector<Document> crawlAndFollowLinks(Document toCrawl) throws Exception {
         Vector<Document> results = new Vector<Document>();
 
-        if (this.robotsTxtService.isAllowedUri(toCrawl.getUri())) {
-
-            HttpResponse headResponse = httpService.getUrlWithHead(toCrawl.getUri());
-            Header header = headResponse.getLastHeader(new String("Content-Type"));
-            Boolean isHtml = header.getValue().contains(new String("text/html"));
-            //close connection
-            EntityUtils.consume(headResponse.getEntity());
-
-            if (isHtml) {
-                //do the real request
-                System.out.println("Crawling " + toCrawl.getUri().toString());
-
-                HttpResponse getResponse = httpService.getUriWithGet(toCrawl.getUri());
-                toCrawl.incrementCrawCount();
-                toCrawl.setCrawlingState(Document.CRAWLING_STATE_CRAWLED);
-
-
-                BufferedInputStream is = new BufferedInputStream(getResponse.getEntity().getContent());
-                CharsetDetector charsetDetector = new CharsetDetector();
-                charsetDetector.setText(is);
-                CharsetMatch match = charsetDetector.detect();
-
-                byte[] bytes    = IOUtils.toByteArray(is);
-                byte[] utf8     = new String(bytes, match.getName()).getBytes("UTF-8");
-                String website  = new String(utf8,"UTF-8");
-
-                Pattern regex = Pattern.compile("(<meta.*?charset=[^\"']+(\"|')[^>]*>)",Pattern.CASE_INSENSITIVE);
-                Matcher regexMatcher = regex.matcher(website);
-                website = regexMatcher.replaceAll("");
-
-                toCrawl.setContent(website);
-                toCrawl.setMimeType(getResponse.getEntity().getContentType().getValue());
-
-
-                results.add(toCrawl);
-                results = this.prepareLinkedDocuments(results, toCrawl);
-
-                EntityUtils.consume(getResponse.getEntity());
-            }
-
-        } else {
+        if (!this.robotsTxtService.isAllowedUri(toCrawl.getUri())) {
             System.out.println("Crawl blocked by robotstxt txt");
+            return results;
         }
 
+        HttpResponse headResponse = httpService.getUrlWithHead(toCrawl.getUri());
+        Header header = headResponse.getLastHeader(new String("Content-Type"));
+        Boolean isHeadIndicatingHtml = header.getValue().contains(new String("text/html"));
+        //close connection
+        EntityUtils.consume(headResponse.getEntity());
+
+        if (!isHeadIndicatingHtml) {
+            System.out.println("No html response indicated by head");
+            this.httpService.closeAllConnections();
+            return results;
+        }
+
+
+        HttpResponse getResponse = httpService.getUriWithGet(toCrawl.getUri());
+        String getMimeType = getResponse.getEntity().getContentType().getValue();
+        Boolean isGetIndicatingHtml = getMimeType.contains(new String("text/html"));
+
+        if (!isGetIndicatingHtml) {
+            System.out.println("No html response indicated in get");
+            this.httpService.closeAllConnections();
+            return results;
+        }
+
+        Long contentLength      = getResponse.getEntity().getContentLength();
+        int contentSizeLimit   = 1024 * 1024;
+
+        if(contentLength > contentSizeLimit) {
+            System.out.println("Skipping to large file "+contentLength);
+            this.httpService.closeAllConnections();
+            return results;
+        }
+
+        //do the real request
+        System.out.println("Crawling " + toCrawl.getUri().toString());
+        toCrawl.incrementCrawCount();
+        toCrawl.setCrawlingState(Document.CRAWLING_STATE_CRAWLED);
+
+        String website = getWebsiteUTF8Content(getResponse);
+
+        toCrawl.setContent(website);
+        toCrawl.setMimeType(getMimeType);
+        results.add(toCrawl);
+        results = this.prepareLinkedDocuments(results, toCrawl);
+        EntityUtils.consume(getResponse.getEntity());
+
         return results;
+    }
+
+    private String getWebsiteUTF8Content(HttpResponse getResponse) throws IOException {
+        BufferedInputStream is = new BufferedInputStream(getResponse.getEntity().getContent());
+        CharsetDetector charsetDetector = new CharsetDetector();
+        charsetDetector.setText(is);
+        CharsetMatch match = charsetDetector.detect();
+        String website = "";
+
+        if (!match.getName().equals("UTF-8")) {
+            byte[] bytes = IOUtils.toByteArray(is);
+            byte[] utf8 = new String(bytes, match.getName()).getBytes("UTF-8");
+            website = new String(utf8, "UTF-8");
+
+            Pattern regex = Pattern.compile("(<meta.*?charset=[^\"']+(\"|')[^>]*>)", Pattern.CASE_INSENSITIVE);
+            Matcher regexMatcher = regex.matcher(website);
+            website = regexMatcher.replaceAll("");
+        } else {
+            website = IOUtils.toString(is);
+        }
+        return website;
     }
 
 
