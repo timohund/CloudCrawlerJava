@@ -1,10 +1,11 @@
 package cloudcrawler.domain.crawler;
 
 import cloudcrawler.domain.crawler.contentparser.XHTMLContentParser;
-import cloudcrawler.domain.crawler.schedule.CrawlingScheduleStrategy;
+import cloudcrawler.domain.crawler.robotstxt.RobotsTxtService;
 import cloudcrawler.system.charset.converter.ConversionResult;
 import cloudcrawler.system.charset.converter.ConversionService;
 import cloudcrawler.system.http.HttpService;
+import cloudcrawler.system.stream.SizeValidator;
 import cloudcrawler.system.uri.URIUnifier;
 import com.google.inject.Inject;
 import org.apache.http.Header;
@@ -15,6 +16,7 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -42,22 +44,25 @@ public class Service {
 
     protected XHTMLContentParser xHTMLParser;
 
-    protected cloudcrawler.domain.crawler.robotstxt.Service robotsTxtService;
+    protected RobotsTxtService robotsTxtRobotsTxtService;
 
     protected ConversionService utf8ConversionService;
 
+    protected SizeValidator sizeValidator;
+
     @Inject
-    public Service( HttpService httpService,
-                    URIUnifier uriUnifier,
-                    XHTMLContentParser xHTMLParser,
-                    CrawlingScheduleStrategy schedulingStrategy,
-                    cloudcrawler.domain.crawler.robotstxt.Service robotsTxtService,
-                    ConversionService utf8ConversionService) {
+    public Service(HttpService httpService,
+                   URIUnifier uriUnifier,
+                   XHTMLContentParser xHTMLParser,
+                   RobotsTxtService robotsTxtRobotsTxtService,
+                   ConversionService utf8ConversionService,
+                   SizeValidator sizeValidator) {
         this.httpService = httpService;
         this.uriUni = uriUnifier;
         this.xHTMLParser = xHTMLParser;
-        this.robotsTxtService = robotsTxtService;
+        this.robotsTxtRobotsTxtService = robotsTxtRobotsTxtService;
         this.utf8ConversionService = utf8ConversionService;
+        this.sizeValidator = sizeValidator;
     }
 
     /**
@@ -71,16 +76,15 @@ public class Service {
     public Vector<Document> crawlAndFollowLinks(Document toCrawl) throws Exception {
         Vector<Document> results = new Vector<Document>();
 
-        if (    getRequestIsUnAllowedByRobotsTxt(toCrawl) ||
-                getHeadRequestIndicatesUnAllowedContentType(toCrawl) ) {
+        if (getRequestIsUnAllowedByRobotsTxt(toCrawl) ||
+                getHeadRequestIndicatesUnAllowedContentType(toCrawl)) {
             return results;
         }
 
-        HttpResponse getResponse    = httpService.getUriWithGet(toCrawl.getUri());
-        String getMimeType          = getResponse.getEntity().getContentType().getValue();
+        HttpResponse getResponse = httpService.getUriWithGet(toCrawl.getUri());
+        String getMimeType = getResponse.getEntity().getContentType().getValue();
 
-        if (    getGetRequestIndicatesUnAllowedContentType(getMimeType) ||
-                getGetRequestIndicatesUnAllowedContentLength(getResponse) ) {
+        if (getGetRequestIndicatesUnAllowedContentType(getMimeType)) {
             return results;
         }
 
@@ -89,8 +93,15 @@ public class Service {
         toCrawl.incrementCrawCount();
         toCrawl.setCrawlingState(Document.CRAWLING_STATE_CRAWLED);
 
-        InputStream is= getResponse.getEntity().getContent();
-        String website = convertWebsiteInputStreamToUtf8String(is);
+        InputStream is = getResponse.getEntity().getContent();
+
+        BufferedInputStream bis     = new BufferedInputStream(is);
+
+        if (getContainsUnAllowedFileSize(bis)) {
+            return results;
+        }
+
+        String website = convertWebsiteInputStreamToUtf8String(bis);
         toCrawl.setContent(website);
         toCrawl.setMimeType(getMimeType);
         results.add(toCrawl);
@@ -98,6 +109,23 @@ public class Service {
         EntityUtils.consume(getResponse.getEntity());
 
         return results;
+    }
+
+    /**
+     *
+     * @param bis
+     * @return
+     * @throws IOException
+     */
+    protected boolean getContainsUnAllowedFileSize(BufferedInputStream bis) throws IOException {
+       boolean hasAllowedSize = sizeValidator.validate(bis, 1024*1024);
+
+       if(!hasAllowedSize) {
+           System.out.println("Crawl blocked by unallowed filesize");
+           return true;
+       }
+
+       return false;
     }
 
     /**
@@ -109,30 +137,12 @@ public class Service {
      */
     private boolean getRequestIsUnAllowedByRobotsTxt(Document toCrawl) throws Exception {
         boolean isBlocked = true;
-        isBlocked = !this.robotsTxtService.isAllowedUri(toCrawl.getUri());
-        if(isBlocked) {
+        isBlocked = !this.robotsTxtRobotsTxtService.isAllowedUri(toCrawl.getUri());
+        if (isBlocked) {
             System.out.println("Crawl blocked by robotstxt txt");
         }
 
         return isBlocked;
-    }
-
-    /**
-     * This method is used to check if the getResponse indicates a to large content size.
-     *
-     * @param getResponse
-     * @return boolean
-     */
-    private boolean getGetRequestIndicatesUnAllowedContentLength(HttpResponse getResponse) {
-        Vector<Document> results;
-        Long contentLength = getResponse.getEntity().getContentLength();
-        int contentSizeLimit = 1024 * 1024;
-        if (contentLength > contentSizeLimit) {
-            System.out.println("Skipping to large file " + contentLength);
-            this.httpService.reset();
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -174,19 +184,18 @@ public class Service {
         return false;
     }
 
-
     /**
      * Converts the input stream of the website into utf8.
      *
-     * @param is
+     * @param bis
      * @return
      * @throws IOException
      */
-    private String convertWebsiteInputStreamToUtf8String(InputStream is) throws IOException {
-        ConversionResult result = utf8ConversionService.convertToUTF8(is);
-        String website          = result.getContent();
+    private String convertWebsiteInputStreamToUtf8String(BufferedInputStream bis) throws IOException {
+        ConversionResult result = utf8ConversionService.convertToUTF8(bis);
+        String website = result.getContent();
 
-        if(result.getWasConverted()) {
+        if (result.getWasConverted()) {
             Pattern regex = Pattern.compile("(<meta.*?charset=[^\"']+(\"|')[^>]*>)", Pattern.CASE_INSENSITIVE);
             Matcher regexMatcher = regex.matcher(website);
             website = regexMatcher.replaceAll("");
@@ -217,27 +226,28 @@ public class Service {
 
             for (Link link : links) {
                 //todo make the link filter configureable
-                if (!(link == null) && link.getTargetUri().toString().contains(".de/")) {
-
-                    //todo remove query and fragment here, make it more flexible
-                    URI unifiedUri = this.uriUni.unifiy(link.getTargetUri(), document.getUri(), baseURI);
-                    link.setTargetUri(unifiedUri);
-                    link.setSourceUri(document.getUri());
-
-                    URIBuilder builder = new URIBuilder(unifiedUri);
-                    builder.setQuery(null);
-                    builder.setFragment(null);
-                    unifiedUri = builder.build();
-
-                    //create a new document from the followed link
-                    Document linkDocument = new Document();
-
-                    linkDocument.addIncomingLink(link);
-                    linkDocument.setUri(unifiedUri);
-                    linkDocument.setCrawlingState(Document.CRAWLING_STATE_WAITING);
-
-                    result.add(linkDocument);
+                if ((link == null) || !link.getTargetUri().toString().contains(".de/")) {
+                    continue;
                 }
+
+                //todo remove query and fragment here, make it more flexible
+                URI unifiedUri = this.uriUni.unifiy(link.getTargetUri(), document.getUri(), baseURI);
+                link.setTargetUri(unifiedUri);
+                link.setSourceUri(document.getUri());
+
+                URIBuilder builder = new URIBuilder(unifiedUri);
+                builder.setQuery(null);
+                builder.setFragment(null);
+                unifiedUri = builder.build();
+
+                //create a new document from the followed link
+                Document linkDocument = new Document();
+
+                linkDocument.addIncomingLink(link);
+                linkDocument.setUri(unifiedUri);
+                linkDocument.setCrawlingState(Document.CRAWLING_STATE_WAITING);
+
+                result.add(linkDocument);
             }
 
             document.incrementLinkAnalyzeCount();

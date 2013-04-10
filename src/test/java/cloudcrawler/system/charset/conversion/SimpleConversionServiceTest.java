@@ -9,10 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -48,7 +45,8 @@ public class SimpleConversionServiceTest extends AbstractTest {
     public void simpleConversionTest() throws IOException {
         File file               = new File("src/test/fixtures/files/simpletest/"+this.fixtureName);
         InputStream is          = new FileInputStream(file);
-        ConversionResult result = this.converter.convertToUTF8(is);
+        BufferedInputStream bis = new BufferedInputStream(is);
+        ConversionResult result = this.converter.convertToUTF8(bis);
 
         Assert.assertEquals(this.conversionExpected,result.getWasConverted());
         Assert.assertEquals("Straßenüberquerung!",result.getContent());

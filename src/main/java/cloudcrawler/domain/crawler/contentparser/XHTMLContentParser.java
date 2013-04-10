@@ -7,10 +7,8 @@ import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
@@ -29,8 +27,6 @@ import java.util.Vector;
 public class XHTMLContentParser extends XMLContentParser {
 
     protected Document document;
-
-
 
     @Override
     protected void afterInitialize() throws ParserConfigurationException, IOException, SAXException {
@@ -120,22 +116,5 @@ public class XHTMLContentParser extends XMLContentParser {
             //can happen
         }
         return aHref;
-    }
-
-    private class SystemErrorHandler implements ErrorHandler {
-        @Override
-        public void warning(SAXParseException exception) throws SAXException {
-            //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        @Override
-        public void error(SAXParseException exception) throws SAXException {
-            //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        @Override
-        public void fatalError(SAXParseException exception) throws SAXException {
-            //To change body of implemented methods use File | Settings | File Templates.
-        }
     }
 }

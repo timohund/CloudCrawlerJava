@@ -7,10 +7,9 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
- * Service class to convert an input stream to an utf8 output string.
+ * RobotsTxtService class to convert an input stream to an utf8 output string.
  *
  * @author Timo Schmidt <timo-schmidt@gmx.net>
  */
@@ -23,9 +22,9 @@ public class ConversionService {
         this.charsetDetector = charsetDetector;
     }
 
-    public ConversionResult convertToUTF8(InputStream is) throws IOException {
+    public ConversionResult convertToUTF8(BufferedInputStream bis) throws IOException {
         ConversionResult result     = new ConversionResult();
-        BufferedInputStream bis     = new BufferedInputStream(is);
+
 
         charsetDetector.setText(bis);
 

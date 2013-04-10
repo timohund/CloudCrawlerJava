@@ -9,6 +9,7 @@ package cloudcrawler.mapreduce;
 import cloudcrawler.domain.crawler.Document;
 import cloudcrawler.domain.crawler.Service;
 import cloudcrawler.domain.crawler.message.DocumentMessage;
+import cloudcrawler.mapreduce.crawler.CrawlingMapper;
 import com.google.gson.Gson;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
