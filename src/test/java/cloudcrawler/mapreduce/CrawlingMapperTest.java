@@ -11,6 +11,7 @@ import cloudcrawler.domain.crawler.Service;
 import cloudcrawler.domain.crawler.message.DocumentMessage;
 import cloudcrawler.mapreduce.crawler.CrawlingMapper;
 import com.google.gson.Gson;
+import junit.framework.AssertionFailedError;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.easymock.EasyMock;
@@ -77,12 +78,25 @@ public class CrawlingMapperTest {
     }
 
     @Test
-    public void crawlingCountdownIsDecrementedForUnCrawledDocument() {
+    public void crawlingDocumentWithStateWaitingWillNotBeCrawled() throws Exception {
 
-    }
+                //crawl should never be executed because we pass a document in the state waiting
+        expect(crawlingServiceMock.crawlAndFollowLinks(isA(Document.class))).andThrow(new AssertionFailedError()).anyTimes();
 
-    @Test
-    public void crawlingDocumentWithCrawCountDownZeroWillBeCrawled() {
+        replay(crawlingServiceMock);
+            DocumentMessage inputMessage   = new DocumentMessage();
+            Document document                       = new Document();
+            inputMessage.setAttachment(document);
+            document.incrementErrorCount();
+            document.setUri(new URI("http://www.heise.de/"));
+            document.setErrorMessage("test exception");
+            document.setCrawlingState(Document.CRAWLING_STATE_WAITING);
 
+            Text key     = new Text(document.getUri().toString());
+            Text value   = new Text(gson.toJson(inputMessage));
+
+            mapper.map(key,value, contextMock);
+
+        verify(crawlingServiceMock);
     }
 }

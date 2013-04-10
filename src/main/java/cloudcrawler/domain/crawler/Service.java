@@ -74,41 +74,47 @@ public class Service {
      * @throws Exception
      */
     public Vector<Document> crawlAndFollowLinks(Document toCrawl) throws Exception {
-        Vector<Document> results = new Vector<Document>();
 
-        if (getRequestIsUnAllowedByRobotsTxt(toCrawl) ||
-                getHeadRequestIndicatesUnAllowedContentType(toCrawl)) {
+        try {
+            Vector<Document> results = new Vector<Document>();
+
+            if (getRequestIsUnAllowedByRobotsTxt(toCrawl) ||
+                    getHeadRequestIndicatesUnAllowedContentType(toCrawl)) {
+                return results;
+            }
+
+            HttpResponse getResponse = httpService.getUriWithGet(toCrawl.getUri());
+            String getMimeType = getResponse.getEntity().getContentType().getValue();
+
+            if (getGetRequestIndicatesUnAllowedContentType(getMimeType)) {
+                return results;
+            }
+
+            // All checks passed, do the download
+            System.out.println("Crawling " + toCrawl.getUri().toString());
+            toCrawl.incrementCrawCount();
+            toCrawl.setCrawlingState(Document.CRAWLING_STATE_CRAWLED);
+
+            InputStream is = getResponse.getEntity().getContent();
+
+            BufferedInputStream bis     = new BufferedInputStream(is);
+
+            if (getContainsUnAllowedFileSize(bis)) {
+                return results;
+            }
+
+            String website = convertWebsiteInputStreamToUtf8String(bis);
+            toCrawl.setContent(website);
+            toCrawl.setMimeType(getMimeType);
+            results.add(toCrawl);
+            results = this.prepareLinkedDocuments(results, toCrawl);
+            EntityUtils.consume(getResponse.getEntity());
+
             return results;
+        } catch (Exception e) {
+            this.httpService.reset();
+            throw e;
         }
-
-        HttpResponse getResponse = httpService.getUriWithGet(toCrawl.getUri());
-        String getMimeType = getResponse.getEntity().getContentType().getValue();
-
-        if (getGetRequestIndicatesUnAllowedContentType(getMimeType)) {
-            return results;
-        }
-
-        // All checks passed, do the download
-        System.out.println("Crawling " + toCrawl.getUri().toString());
-        toCrawl.incrementCrawCount();
-        toCrawl.setCrawlingState(Document.CRAWLING_STATE_CRAWLED);
-
-        InputStream is = getResponse.getEntity().getContent();
-
-        BufferedInputStream bis     = new BufferedInputStream(is);
-
-        if (getContainsUnAllowedFileSize(bis)) {
-            return results;
-        }
-
-        String website = convertWebsiteInputStreamToUtf8String(bis);
-        toCrawl.setContent(website);
-        toCrawl.setMimeType(getMimeType);
-        results.add(toCrawl);
-        results = this.prepareLinkedDocuments(results, toCrawl);
-        EntityUtils.consume(getResponse.getEntity());
-
-        return results;
     }
 
     /**
@@ -122,6 +128,7 @@ public class Service {
 
        if(!hasAllowedSize) {
            System.out.println("Crawl blocked by unallowed filesize");
+           this.httpService.reset();
            return true;
        }
 
@@ -140,6 +147,7 @@ public class Service {
         isBlocked = !this.robotsTxtRobotsTxtService.isAllowedUri(toCrawl.getUri());
         if (isBlocked) {
             System.out.println("Crawl blocked by robotstxt txt");
+            this.httpService.reset();
         }
 
         return isBlocked;
