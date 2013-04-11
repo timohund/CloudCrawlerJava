@@ -11,7 +11,6 @@ import com.google.inject.Inject;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.util.EntityUtils;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -70,7 +69,7 @@ public class Service {
      * and creating new documents for linked documents.
      *
      * @param toCrawl
-     * @return
+     * @return Vector<Document>
      * @throws Exception
      */
     public Vector<Document> crawlAndFollowLinks(Document toCrawl) throws Exception {
@@ -108,7 +107,7 @@ public class Service {
             toCrawl.setMimeType(getMimeType);
             results.add(toCrawl);
             results = this.prepareLinkedDocuments(results, toCrawl);
-            EntityUtils.consume(getResponse.getEntity());
+            this.httpService.close(getResponse);
 
             return results;
         } catch (Exception e) {
@@ -182,8 +181,7 @@ public class Service {
         HttpResponse headResponse = httpService.getUrlWithHead(toCrawl.getUri());
         Header header = headResponse.getLastHeader(new String("Content-Type"));
         Boolean isHeadIndicatingHtml = header.getValue().contains(new String("text/html"));
-        //close connection
-        EntityUtils.consume(headResponse.getEntity());
+        this.httpService.close(headResponse);
         if (!isHeadIndicatingHtml) {
             System.out.println("No html response indicated by head");
             this.httpService.reset();

@@ -8,6 +8,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.net.URI;
@@ -33,9 +34,10 @@ public class HttpService {
 
     }
 
-    public void reset() {
+    public boolean reset() {
         client.getConnectionManager().shutdown();
         this.init();
+        return true;
     }
 
     /**
@@ -69,6 +71,17 @@ public class HttpService {
         getRequest.setURI(uri);
 
         return client.execute(getRequest);
+    }
+
+    /**
+     *
+     * @param response
+     */
+    public boolean close(HttpResponse response) throws IOException {
+        //close connection
+        EntityUtils.consume(response.getEntity());
+
+        return true;
     }
 
     public String getUserAgent() {
