@@ -83,7 +83,8 @@ public class Service {
             }
 
             HttpResponse getResponse = httpService.getUriWithGet(toCrawl.getUri());
-            String getMimeType = getResponse.getEntity().getContentType().getValue();
+            Header header = getResponse.getLastHeader(new String("Content-Type"));
+            String getMimeType = header.getValue();
 
             if (getGetRequestIndicatesUnAllowedContentType(getMimeType)) {
                 return results;
@@ -94,8 +95,7 @@ public class Service {
             toCrawl.incrementCrawCount();
             toCrawl.setCrawlingState(Document.CRAWLING_STATE_CRAWLED);
 
-            InputStream is = getResponse.getEntity().getContent();
-
+            InputStream is              = getResponse.getEntity().getContent();
             BufferedInputStream bis     = new BufferedInputStream(is);
 
             if (getContainsUnAllowedFileSize(bis)) {
