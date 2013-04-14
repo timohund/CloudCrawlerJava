@@ -118,7 +118,7 @@ public class PageRankMapper extends Mapper<Text, Text, Text, Text> {
                 //we increment the link analyze count and set the rank to 0.0
                 //since all ranks (incoming and outgoing should be reflected in message that will be
                 // combined in the reducer)
-            crawled.incrementLinkAnalyzeCount();
+            crawled.incrementRankAnalyzeCount();
             crawled.setRank(0.0);
 
                 //write back the crawled document

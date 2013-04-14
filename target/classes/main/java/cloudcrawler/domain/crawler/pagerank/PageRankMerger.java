@@ -40,7 +40,7 @@ public class PageRankMerger {
         } else if(message.getAttachmentClassname().equals(InheritedPageRank.class.getCanonicalName())){
             InheritPageRankMessage rankMessage = (InheritPageRankMessage) message;
 
-            this.incomingPageRankCount += rankMessage.getAttachment().getRank();
+            this.incomingPageRankSum += rankMessage.getAttachment().getRank();
             this.incomingPageRankCount++;
         } else {
             throw new UnexpectedMessageException();
