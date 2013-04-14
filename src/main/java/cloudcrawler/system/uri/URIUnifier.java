@@ -50,6 +50,10 @@ public class URIUnifier {
             result = builder.build();
         }
 
+        if(result.getHost() == null) {
+           return null;
+        }
+
             //make at leaste scheme and hostname lowercase
         URIBuilder builder = new URIBuilder(result);
         builder.setScheme(result.getScheme().toLowerCase());

@@ -85,7 +85,6 @@ public class PageRankMapper extends Mapper<Text, Text, Text, Text> {
                 String json = gson.toJson(currentDocumentCrawlMessage);
                 Text crawlingResultValue = new Text(json.toString());
                 context.write(key,crawlingResultValue);
-                System.out.println("Document is not in stated crawled and was skipped "+crawled.getUri().toString());
                 return;
             }
 
@@ -97,8 +96,10 @@ public class PageRankMapper extends Mapper<Text, Text, Text, Text> {
             }
 
             xhtmlContentParser.initialize(crawled.getUri(), crawled.getContent(), crawled.getMimeType());
-            Vector<Link> links = xhtmlContentParser.getExternalLinkUris();
+            Vector<Link> links = xhtmlContentParser.getOutgoingLinks(true);
             double rankToInherit = inheritableRank / links.size();
+
+            System.out.println("Processing: "+crawled.getUri().toString()+" inheriting pagepage "+rankToInherit+" to "+links.size()+" documents");
 
             for(Link link : links){
                 InheritPageRankMessage pageRankMessage = new InheritPageRankMessage();

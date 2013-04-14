@@ -1,9 +1,13 @@
 package cloudcrawler.domain.crawler.contentparser;
 
 import cloudcrawler.domain.crawler.Link;
+import cloudcrawler.system.uri.URIHelper;
+import cloudcrawler.system.uri.URIUnifier;
+import com.google.inject.Inject;
 import nu.validator.htmlparser.common.Heuristics;
 import nu.validator.htmlparser.dom.HtmlDocumentBuilder;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.client.utils.URIBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -28,6 +32,16 @@ public class XHTMLContentParser extends XMLContentParser {
 
     protected Document document;
 
+    protected String secondLevelHostName = "";
+
+    protected URIUnifier uriUni;
+
+    @Inject
+    public void setURIUnifier(URIUnifier uriUni) {
+        this.uriUni = uriUni;
+
+    }
+
     @Override
     protected void afterInitialize() throws ParserConfigurationException, IOException, SAXException {
         InputStream stream = IOUtils.toInputStream(this.sourceContent);
@@ -42,6 +56,8 @@ public class XHTMLContentParser extends XMLContentParser {
         InputSource in = new InputSource(stream);
         in.setEncoding("UTF-8");
 
+        secondLevelHostName = URIHelper.getSecondLevelHostName(this.sourceUri);
+
         document = docBuilder.parse(in);
     }
 
@@ -52,18 +68,34 @@ public class XHTMLContentParser extends XMLContentParser {
      * @throws XPathExpressionException
      * @throws URISyntaxException
      */
-    public Vector<Link> getExternalLinkUris() throws XPathExpressionException, URISyntaxException {
+    public Vector<Link> getOutgoingLinks(boolean onlyOtherDomains) throws XPathExpressionException, URISyntaxException {
         Vector<Link> linkCollection = new Vector<Link>() ;
 
         NodeList nodes = document.getElementsByTagName("a");
+        URI baseUri = this.getBaseHrefUri();
 
         for (int i = 0; i < nodes.getLength(); i++) {
             Node aNode = nodes.item(i);
-            URI aHrefUri    = getUriFromHrefNode(aNode);
+            URI aHrefUri   = getUriFromHrefNode(aNode);
+            URI unifiedUri = this.getUnifiedFilteredUri(aHrefUri,baseUri);
+
+            if(unifiedUri == null) {
+                continue;
+            }
+
+            if(onlyOtherDomains) {
+                    //when the link points to the same second level domain, we skip it
+                String targetSecondLevelHost = URIHelper.getSecondLevelHostName(unifiedUri);
+                if(targetSecondLevelHost.equals(secondLevelHostName)) {
+                    continue;
+                }
+            }
+
             String linkText = aNode.getTextContent().trim();
             Link link = new Link();
 
-            link.setTargetUri(aHrefUri);
+            link.setTargetUri(unifiedUri);
+            link.setSourceUri(this.sourceUri);
 
             if(linkText.length() > 140) {
                 link.setText(new String(linkText.substring(0,140)));
@@ -77,6 +109,21 @@ public class XHTMLContentParser extends XMLContentParser {
         return linkCollection;
     }
 
+    protected URI getUnifiedFilteredUri(URI aHrefUri, URI baseUri) throws URISyntaxException {
+        URI unifiedUri = this.uriUni.unifiy(aHrefUri, this.sourceUri, baseUri);
+
+        if(unifiedUri == null) {
+            return null;
+        }
+
+        //todo remove query and fragment here, make it more flexible
+        URIBuilder builder = new URIBuilder(unifiedUri);
+        builder.setQuery(null);
+        builder.setFragment(null);
+        unifiedUri = builder.build();
+
+        return unifiedUri;
+    }
 
     /**
      * Returns the base href of the html document.

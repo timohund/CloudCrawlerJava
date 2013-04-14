@@ -1,5 +1,6 @@
 package cloudcrawler.domain.crawler.contentparser;
 
+import org.apache.http.client.utils.URIBuilder;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -28,5 +29,6 @@ abstract public class AbstractContentParser {
     }
 
     protected abstract void afterInitialize() throws ParserConfigurationException, IOException, SAXException;
+
 
 }

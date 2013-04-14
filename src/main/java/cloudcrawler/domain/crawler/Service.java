@@ -10,7 +10,6 @@ import cloudcrawler.system.uri.URIUnifier;
 import com.google.inject.Inject;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.utils.URIBuilder;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -39,8 +38,6 @@ public class Service {
 
     protected HttpService httpService;
 
-    protected URIUnifier uriUni;
-
     protected XHTMLContentParser xHTMLParser;
 
     protected RobotsTxtService robotsTxtRobotsTxtService;
@@ -57,7 +54,6 @@ public class Service {
                    ConversionService utf8ConversionService,
                    SizeValidator sizeValidator) {
         this.httpService = httpService;
-        this.uriUni = uriUnifier;
         this.xHTMLParser = xHTMLParser;
         this.robotsTxtRobotsTxtService = robotsTxtRobotsTxtService;
         this.utf8ConversionService = utf8ConversionService;
@@ -228,7 +224,7 @@ public class Service {
         try {
             xHTMLParser.initialize(document.getUri(), document.getContent(), document.getMimeType());
             URI baseURI = xHTMLParser.getBaseHrefUri();
-            Vector<Link> links = xHTMLParser.getExternalLinkUris();
+            Vector<Link> links = xHTMLParser.getOutgoingLinks(false);
 
             for (Link link : links) {
                 //todo make the link filter configureable
@@ -236,21 +232,10 @@ public class Service {
                     continue;
                 }
 
-                //todo remove query and fragment here, make it more flexible
-                URI unifiedUri = this.uriUni.unifiy(link.getTargetUri(), document.getUri(), baseURI);
-                link.setTargetUri(unifiedUri);
-                link.setSourceUri(document.getUri());
-
-                URIBuilder builder = new URIBuilder(unifiedUri);
-                builder.setQuery(null);
-                builder.setFragment(null);
-                unifiedUri = builder.build();
-
                 //create a new document from the followed link
                 Document linkDocument = new Document();
-
                 linkDocument.addIncomingLink(link);
-                linkDocument.setUri(unifiedUri);
+                linkDocument.setUri(link.getTargetUri());
                 linkDocument.setCrawlingState(Document.CRAWLING_STATE_WAITING);
 
                 result.add(linkDocument);

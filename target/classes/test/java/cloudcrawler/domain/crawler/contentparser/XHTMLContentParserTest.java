@@ -1,6 +1,7 @@
 package cloudcrawler.domain.crawler.contentparser;
 
 import cloudcrawler.AbstractTest;
+import cloudcrawler.system.uri.URIUnifier;
 import junit.framework.Assert;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
@@ -55,13 +56,14 @@ public class XHTMLContentParserTest extends AbstractTest {
         String mimeType = new String("text/html");
 
         XHTMLContentParser parser = new XHTMLContentParser();
+        parser.setURIUnifier(new URIUnifier());
         parser.initialize(this.fixtureUri,content,mimeType);
 
         String baseUrl  = parser.getBaseHrefUri().toString();
 
         Assert.assertEquals(this.expectedBaseHref,baseUrl);
-        Assert.assertTrue(parser.getExternalLinkUris().size() > 0);
-        Assert.assertEquals(parser.getExternalLinkUris().get(0).getText(),this.firstLinkLabel);
+        Assert.assertTrue(parser.getOutgoingLinks(false).size() > 0);
+        Assert.assertEquals(parser.getOutgoingLinks(false).get(0).getText(),this.firstLinkLabel);
     }
 
 }

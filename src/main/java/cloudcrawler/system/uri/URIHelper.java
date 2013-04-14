@@ -12,6 +12,9 @@ import java.net.URI;
 public class URIHelper {
 
     public static String getSecondLevelHostName(URI uri) {
+        if(uri.toString().equals("")) {
+            return "";
+        }
         String hostName = uri.getHost();
         int lastDot = hostName.lastIndexOf(".");
         int secondLast = hostName.lastIndexOf(".",lastDot-1);
