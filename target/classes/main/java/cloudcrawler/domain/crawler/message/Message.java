@@ -11,7 +11,7 @@ package cloudcrawler.domain.crawler.message;
 
 import java.net.URI;
 
-abstract public class Message {
+public class Message {
 
     protected URI targetUri;
 

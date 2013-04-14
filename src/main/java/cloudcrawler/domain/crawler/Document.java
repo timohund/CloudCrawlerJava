@@ -33,6 +33,10 @@ public class Document {
 
     protected int linkAnalyzeCount = 0;
 
+    protected int rankAnalyzeCount = 0;
+
+    protected double rank = 0.0;
+
     protected HashMap<String,Link> incomingLinks = new HashMap<String, Link>();
 
     public URI getUri() {
@@ -105,5 +109,21 @@ public class Document {
 
     public int getCrawlingState() {
         return crawlingState;
+    }
+
+    public int getRankAnalyzeCount() {
+        return rankAnalyzeCount;
+    }
+
+    public void incrementRankAnalyzeCount() {
+        this.rankAnalyzeCount++;
+    }
+
+    public double getRank() {
+        return rank;
+    }
+
+    public void setRank(double rank) {
+        this.rank = rank;
     }
 }

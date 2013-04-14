@@ -9,6 +9,7 @@ package cloudcrawler.mapreduce;
 import cloudcrawler.domain.crawler.Document;
 import cloudcrawler.domain.crawler.Service;
 import cloudcrawler.domain.crawler.message.DocumentMessage;
+import cloudcrawler.domain.crawler.message.MessagePersistenceManager;
 import cloudcrawler.mapreduce.crawler.CrawlingMapper;
 import com.google.gson.Gson;
 import junit.framework.AssertionFailedError;
@@ -36,9 +37,10 @@ public class CrawlingMapperTest {
     public void setUp() {
         contextMock         = EasyMock.createMock(Mapper.Context.class);
         gson                = new Gson();
+        MessagePersistenceManager pm = new MessagePersistenceManager(gson);
         crawlingServiceMock = EasyMock.createMock(Service.class);
 
-        mapper = new CrawlingMapper(gson, crawlingServiceMock);
+        mapper = new CrawlingMapper(pm, crawlingServiceMock);
     }
 
     @Test

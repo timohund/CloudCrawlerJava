@@ -3,8 +3,8 @@ package cloudcrawler.mapreduce.crawler;
 import cloudcrawler.domain.crawler.Document;
 import cloudcrawler.domain.crawler.Service;
 import cloudcrawler.domain.crawler.message.DocumentMessage;
+import cloudcrawler.domain.crawler.message.MessagePersistenceManager;
 import cloudcrawler.ioc.CloudCrawlerModule;
-import com.google.gson.Gson;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.apache.hadoop.io.Text;
@@ -16,36 +16,36 @@ import java.util.Vector;
 
 public class CrawlingMapper extends Mapper<Text, Text, Text, Text> {
 
-    protected Gson gson;
-
     protected Service crawlingService;
 
     protected Injector injector;
 
-    public void setGson(Gson gson) {
-        this.gson = gson;
-    }
-
-    public void setCrawlingService(Service crawlingService) {
-        this.crawlingService = crawlingService;
-    }
+    protected MessagePersistenceManager messageManager;
 
     public CrawlingMapper() {
             //since the Crawling mapper is instanciated in hadoop
             //we inject the dependecies by our own
         injector = Guice.createInjector(new CloudCrawlerModule());
 
-        this.setGson(injector.getInstance(Gson.class));
+        this.setMessageManager(injector.getInstance(MessagePersistenceManager.class));
         this.setCrawlingService(injector.getInstance(Service.class));
+    }
+
+    public void setCrawlingService(Service crawlingService) {
+        this.crawlingService = crawlingService;
+    }
+
+    public void setMessageManager(MessagePersistenceManager messageManager) {
+        this.messageManager = messageManager;
     }
 
     /**
      *
-     * @param gson
+     * @param messageManager
      * @param service
      */
-    public CrawlingMapper(Gson gson, Service service) {
-        this.setGson(gson);
+    public CrawlingMapper(MessagePersistenceManager messageManager, Service service) {
+        this.setMessageManager(messageManager);
         this.setCrawlingService(service);
     }
 
@@ -62,7 +62,7 @@ public class CrawlingMapper extends Mapper<Text, Text, Text, Text> {
         message.getAttachment().incrementErrorCount();
         message.getAttachment().setErrorMessage(e.getMessage());
 
-        String json                 = gson.toJson(message);
+        String json                 = messageManager.sleep(message);
         Text crawlingResultValue    = new Text(json.toString());
 
         context.write(key, crawlingResultValue);
@@ -91,7 +91,7 @@ public class CrawlingMapper extends Mapper<Text, Text, Text, Text> {
                     //new document from the input file without json are allways scheduled directly
                 crawled.setCrawlingState(Document.CRAWLING_STATE_SCHEDULED);
             } else {
-                currentDocumentCrawlMessage = gson.fromJson(value.toString(),DocumentMessage.class);
+                currentDocumentCrawlMessage = (DocumentMessage) messageManager.wakeup(value.toString());
                 crawled = currentDocumentCrawlMessage.getAttachment();
             }
 
@@ -111,7 +111,7 @@ public class CrawlingMapper extends Mapper<Text, Text, Text, Text> {
                                 linkTargetCrwalingMessage.setAttachment(crawlingResult);
                                 linkTargetCrwalingMessage.setTargetUri(crawlingResult.getUri());
 
-                                String json = gson.toJson(linkTargetCrwalingMessage);
+                                String json = messageManager.sleep(linkTargetCrwalingMessage);
 
                                 Text crawlingResultKey = new Text(crawlingResult.getUri().toString());
                                 Text crawlingResultValue = new Text(json.toString());
@@ -120,13 +120,13 @@ public class CrawlingMapper extends Mapper<Text, Text, Text, Text> {
                             }
                         } else {
                                 //repost the document
-                            String json = gson.toJson(currentDocumentCrawlMessage);
+                            String json = messageManager.sleep(currentDocumentCrawlMessage);
                             Text crawlingResultValue = new Text(json.toString());
                             context.write(key,crawlingResultValue);
                         }
                     } else {
                            //repost the document
-                        String json = gson.toJson(currentDocumentCrawlMessage);
+                        String json = messageManager.sleep(currentDocumentCrawlMessage);
                         Text crawlingResultValue = new Text(json.toString());
                         context.write(key,crawlingResultValue);
                     }

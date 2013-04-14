@@ -3,9 +3,10 @@ package cloudcrawler.mapreduce.crawler;
 import cloudcrawler.domain.crawler.Document;
 import cloudcrawler.domain.crawler.DocumentMerger;
 import cloudcrawler.domain.crawler.message.DocumentMessage;
+import cloudcrawler.domain.crawler.message.Message;
+import cloudcrawler.domain.crawler.message.MessagePersistenceManager;
 import cloudcrawler.domain.crawler.schedule.CrawlingScheduleStrategy;
 import cloudcrawler.ioc.CloudCrawlerModule;
-import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -18,23 +19,23 @@ import java.util.Iterator;
 
 public class CrawlingReducer extends Reducer<Text, Text, Text, Text> {
 
-    protected Gson gson = new Gson();
-
     protected Injector injector;
 
     protected DocumentMerger merger;
 
     protected CrawlingScheduleStrategy crawlingScheduler;
 
+    protected MessagePersistenceManager messageManager;
+
     public CrawlingReducer() {
         injector = Guice.createInjector(new CloudCrawlerModule());
-        this.setGson(injector.getInstance(Gson.class));
+        this.setMessageManager(injector.getInstance(MessagePersistenceManager.class));
         this.setMerger(injector.getInstance(DocumentMerger.class));
         this.setCrawlingScheduler(injector.getInstance(CrawlingScheduleStrategy.class));
     }
 
-    public void setGson(Gson gson) {
-        this.gson = gson;
+    public void setMessageManager(MessagePersistenceManager messageManager) {
+        this.messageManager = messageManager;
     }
 
     public void setMerger(DocumentMerger merger) {
@@ -53,19 +54,17 @@ public class CrawlingReducer extends Reducer<Text, Text, Text, Text> {
      * @throws InterruptedException
      */
     public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
-
         try {
-
             this.merger.reset();
 
             for (Text val : values) {
                 String json = val.toString();
 
                 try {
-                    DocumentMessage message = gson.fromJson(json, DocumentMessage.class);
-                    Document document = message.getAttachment();
+                    Message message = messageManager.wakeup(json);
+                    DocumentMessage documentMessage = (DocumentMessage) message;
+                    Document document = documentMessage.getAttachment();
                     merger.merge(key.toString(), document);
-
                 } catch (JsonIOException e) {
                     e.printStackTrace();
                 } catch (NullPointerException e) {
@@ -98,7 +97,7 @@ public class CrawlingReducer extends Reducer<Text, Text, Text, Text> {
 
             DocumentMessage documentMessage = new DocumentMessage();
             documentMessage.setAttachment(document);
-            String documentMessageJson = " "+gson.toJson(documentMessage);
+            String documentMessageJson = " "+messageManager.sleep(documentMessage);
             context.write(new Text(url),new Text(documentMessageJson));
         }
 

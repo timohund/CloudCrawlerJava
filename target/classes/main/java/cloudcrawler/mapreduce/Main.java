@@ -2,6 +2,8 @@ package cloudcrawler.mapreduce;
 
 import cloudcrawler.mapreduce.crawler.CrawlingMapper;
 import cloudcrawler.mapreduce.crawler.CrawlingReducer;
+import cloudcrawler.mapreduce.siterank.PageRankMapper;
+import cloudcrawler.mapreduce.siterank.PageRankReducer;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -30,7 +32,7 @@ public class Main {
         String action = args[0];
 
         if(action.equals("crawl")) {
-            Job job = new Job(conf, "cloudcrawler");
+            Job job = new Job(conf, "cloudcrawler - crawling");
             job.setJarByClass(Main.class);
             job.setMapperClass(CrawlingMapper.class);
             job.setNumReduceTasks(5);
@@ -41,9 +43,24 @@ public class Main {
 
             FileInputFormat.addInputPath(job, new Path(args[1]));
             FileOutputFormat.setOutputPath(job, new Path(args[2]));
-
             System.exit(job.waitForCompletion(true) ? 0 : 1);
         }
+
+        if(action.equals("pagerank")) {
+            Job job = new Job(conf, "cloudcrawler - pagerank");
+            job.setJarByClass(Main.class);
+            job.setMapperClass(PageRankMapper.class);
+            job.setNumReduceTasks(5);
+            job.setReducerClass(PageRankReducer.class);
+            job.setOutputKeyClass(Text.class);
+            job.setOutputValueClass(Text.class);
+            job.setInputFormatClass(KeyValueTextInputFormat.class);
+
+            FileInputFormat.addInputPath(job, new Path(args[1]));
+            FileOutputFormat.setOutputPath(job, new Path(args[2]));
+            System.exit(job.waitForCompletion(true) ? 0 : 1);
+        }
+
     }
 }
 
