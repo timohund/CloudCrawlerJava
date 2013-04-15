@@ -35,7 +35,6 @@ public class Main {
             Job job = new Job(conf, "cloudcrawler - crawling");
             job.setJarByClass(Main.class);
             job.setMapperClass(CrawlingMapper.class);
-            job.setNumReduceTasks(5);
             job.setReducerClass(CrawlingReducer.class);
             job.setOutputKeyClass(Text.class);
             job.setOutputValueClass(Text.class);
@@ -50,7 +49,7 @@ public class Main {
             Job job = new Job(conf, "cloudcrawler - pagerank");
             job.setJarByClass(Main.class);
             job.setMapperClass(PageRankMapper.class);
-            job.setNumReduceTasks(5);
+
             job.setReducerClass(PageRankReducer.class);
             job.setOutputKeyClass(Text.class);
             job.setOutputValueClass(Text.class);

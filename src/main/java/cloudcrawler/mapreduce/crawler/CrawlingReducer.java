@@ -75,7 +75,6 @@ public class CrawlingReducer extends Reducer<Text, Text, Text, Text> {
                 context.progress();
             }
 
-
             this.emitAll(this.merger.getResult(),context);
         }catch (Exception e) {
             e.printStackTrace();
@@ -84,6 +83,7 @@ public class CrawlingReducer extends Reducer<Text, Text, Text, Text> {
 
     protected void emitAll(HashMap<String,Document> mergeResult,Context context) throws Exception {
         Iterator it = mergeResult.keySet().iterator();
+
         while(it.hasNext()) {
             String url = it.next().toString();
             Document document = mergeResult.get(url);

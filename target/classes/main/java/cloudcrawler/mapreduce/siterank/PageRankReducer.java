@@ -70,13 +70,13 @@ public class PageRankReducer  extends Reducer<Text, Text, Text, Text> {
 
             DocumentMessage mergedDocument = pageRankMerger.getResult();
             if(mergedDocument == null) {
-                throw new Exception("Unable to merge document "+key.toString());
+                System.out.println("Can not merge document "+key.toString());
+                return;
             }
 
-            if(mergedDocument.getAttachment().getRank() > 20.0) {
+            if(mergedDocument.getAttachment().getRank() > 10.0) {
                 System.out.println("High page rank document "+mergedDocument.getAttachment().getRank()+" "+mergedDocument.getAttachment().getUri().toString());
             }
-        //    System.out.println("Assigning pagerank "+mergedDocument.getAttachment().getRank()+" to "+mergedDocument.getAttachment().getUri());
 
             String documentMessageJson = " "+messageManager.sleep(mergedDocument);
             context.write(key, new Text(documentMessageJson));

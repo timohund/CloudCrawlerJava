@@ -17,7 +17,7 @@ public class FixedAmountPerRunStrategy implements CrawlingScheduleStrategy{
 
     protected HashMap<String,Integer> scheduleDomainItemCounts = new HashMap<String, Integer>();
 
-    protected int pagesPerRun = 2;
+    protected int pagesPerRun = 4;
 
     public int getPagesPerRun() {
         return pagesPerRun;

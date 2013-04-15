@@ -5,59 +5,33 @@ import cloudcrawler.domain.crawler.Link;
 import cloudcrawler.domain.crawler.contentparser.XHTMLContentParser;
 import cloudcrawler.domain.crawler.message.DocumentMessage;
 import cloudcrawler.domain.crawler.message.InheritPageRankMessage;
+import cloudcrawler.domain.crawler.message.Message;
+import cloudcrawler.domain.crawler.message.MessagePersistenceManager;
 import cloudcrawler.domain.crawler.pagerank.InheritedPageRank;
 import cloudcrawler.ioc.CloudCrawlerModule;
-import com.google.gson.Gson;
+import cloudcrawler.mapreduce.AbstractMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Mapper;
 
 import java.io.IOException;
 import java.util.Vector;
 
 /**
- * Created with IntelliJ IDEA.
- * User: timo
- * Date: 14.04.13
- * Time: 10:08
- * To change this template use File | Settings | File Templates.
+ * The page rank mapper is producing pank
  */
-public class PageRankMapper extends Mapper<Text, Text, Text, Text> {
-
-    protected Gson gson;
+public class PageRankMapper extends AbstractMapper {
 
     protected Injector injector;
 
     protected XHTMLContentParser xhtmlContentParser;
 
-
     public PageRankMapper() {
         //since the Crawling mapper is instanciated in hadoop
         //we inject the dependecies by our own
         injector = Guice.createInjector(new CloudCrawlerModule());
-        this.setGson(injector.getInstance(Gson.class));
         this.setXhtmlContentParser(injector.getInstance(XHTMLContentParser.class));
-    }
-
-    public Gson getGson() {
-        return gson;
-    }
-
-    public void setGson(Gson gson) {
-        this.gson = gson;
-    }
-
-    public Injector getInjector() {
-        return injector;
-    }
-
-    public void setInjector(Injector injector) {
-        this.injector = injector;
-    }
-
-    public XHTMLContentParser getXhtmlContentParser() {
-        return xhtmlContentParser;
+        this.setMessageManager(injector.getInstance(MessagePersistenceManager.class));
     }
 
     public void setXhtmlContentParser(XHTMLContentParser xhtmlContentParser) {
@@ -74,17 +48,23 @@ public class PageRankMapper extends Mapper<Text, Text, Text, Text> {
      */
     public void map(Text key, Text value, Context context) throws IOException, InterruptedException {
         try {
-            DocumentMessage currentDocumentCrawlMessage = gson.fromJson(value.toString(),DocumentMessage.class);
-            Document crawled = currentDocumentCrawlMessage.getAttachment();
+            Message message = this.messageManager.wakeup(value.toString());
+
+            if(!message.getAttachmentClassname().equals(Document.class.getCanonicalName())) {
+                System.out.println("Can not handle messge with class "+message.getAttachmentClassname());
+                return;
+            }
+
+            DocumentMessage currentDocumentCrawlMessage = (DocumentMessage) message;
+            Document        crawled = currentDocumentCrawlMessage.getAttachment();
 
             if(crawled == null) {
                 return;
             }
 
             if(crawled.getCrawlingState() != Document.CRAWLING_STATE_CRAWLED) {
-                String json = gson.toJson(currentDocumentCrawlMessage);
-                Text crawlingResultValue = new Text(json.toString());
-                context.write(key,crawlingResultValue);
+                    //we can only evaluate outgoing links for crawled documents
+                postMessage(key,currentDocumentCrawlMessage,context);
                 return;
             }
 
@@ -97,7 +77,11 @@ public class PageRankMapper extends Mapper<Text, Text, Text, Text> {
 
             xhtmlContentParser.initialize(crawled.getUri(), crawled.getContent(), crawled.getMimeType());
             Vector<Link> links = xhtmlContentParser.getOutgoingLinks(true);
-            double rankToInherit = inheritableRank / links.size();
+
+            double rankToInherit = 0.0;
+            if(links.size() > 0) {
+                rankToInherit = inheritableRank / links.size();
+            }
 
             System.out.println("Processing: "+crawled.getUri().toString()+" inheriting pagepage "+rankToInherit+" to "+links.size()+" documents");
 
@@ -109,11 +93,8 @@ public class PageRankMapper extends Mapper<Text, Text, Text, Text> {
                 pageRankMessage.setTargetUri(link.getTargetUri());
 
                 Text pageRankKey = new Text(link.getTargetUri().toString());
-                String json = gson.toJson(pageRankMessage);
-                Text pageRankMessageValue = new Text(json.toString());
-                context.write(pageRankKey,pageRankMessageValue);
+                postMessage(pageRankKey,pageRankMessage,context);
             }
-
 
                 //we increment the link analyze count and set the rank to 0.0
                 //since all ranks (incoming and outgoing should be reflected in message that will be
@@ -122,14 +103,10 @@ public class PageRankMapper extends Mapper<Text, Text, Text, Text> {
             crawled.setRank(0.0);
 
                 //write back the crawled document
-            String json = gson.toJson(currentDocumentCrawlMessage);
-            Text crawlingResultValue = new Text(json.toString());
-            context.write(key,crawlingResultValue);
-
+            postMessage(key,currentDocumentCrawlMessage,context);
         } catch (Exception e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
         }
-
     }
 }
