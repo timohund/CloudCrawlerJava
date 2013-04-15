@@ -18,7 +18,10 @@ import java.io.IOException;
 import java.util.Vector;
 
 /**
- * The page rank mapper is producing pank
+ * The page rank mapper is producing pagerank messages. It inherits his
+ * own page rank to linked documents by sending messages to the linked websites.
+ *
+ * @author Timo Schmidt <timo-schmidt@gmx.net>
  */
 public class PageRankMapper extends AbstractMapper {
 
