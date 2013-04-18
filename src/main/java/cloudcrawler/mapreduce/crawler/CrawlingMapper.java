@@ -71,18 +71,8 @@ public class CrawlingMapper extends AbstractMapper {
                //when the key is empty we skip the row
             if(key.toString().trim() == "") {   return;  }
                 //create or retrieve the crawling document from json
-            DocumentMessage currentDocumentCrawlMessage = new DocumentMessage();
-            Document crawled = new Document();
-            currentDocumentCrawlMessage.setAttachment(crawled);
-
-                //reconstitute the object or assign the uri
-            if (value.toString().trim().equals("") ) {
-                    //new document from the input file without json are allways scheduled directly
-                crawled.setCrawlingState(Document.CRAWLING_STATE_SCHEDULED);
-            } else {
-                currentDocumentCrawlMessage = (DocumentMessage) messageManager.wakeup(value.toString());
-                crawled = currentDocumentCrawlMessage.getAttachment();
-            }
+            DocumentMessage currentDocumentCrawlMessage = getOrCreateCrawlMessage(value);
+            Document crawled = currentDocumentCrawlMessage.getAttachment();
 
             try {
                 URI uri = new URI(key.toString());
@@ -128,5 +118,20 @@ public class CrawlingMapper extends AbstractMapper {
             System.out.println(e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private DocumentMessage getOrCreateCrawlMessage(Text value) {
+        DocumentMessage currentDocumentCrawlMessage = new DocumentMessage();
+        if (value.toString().trim().equals("") ) {
+            //no value present => create document
+            Document crawlDocument = new Document();
+            crawlDocument.setCrawlingState(Document.CRAWLING_STATE_SCHEDULED);
+            currentDocumentCrawlMessage.setAttachment(crawlDocument);
+        } else {
+            //reconstitute the object or assign the uri
+            currentDocumentCrawlMessage = (DocumentMessage) messageManager.wakeup(value.toString());
+        }
+
+        return currentDocumentCrawlMessage;
     }
 }

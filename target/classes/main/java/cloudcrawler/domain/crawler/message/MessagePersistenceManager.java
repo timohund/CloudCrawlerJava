@@ -1,7 +1,7 @@
 package cloudcrawler.domain.crawler.message;
 
 import cloudcrawler.domain.crawler.Document;
-import cloudcrawler.domain.crawler.pagerank.InheritedPageRank;
+import cloudcrawler.domain.crawler.trust.link.InheritedLinkTrust;
 import com.google.gson.Gson;
 import com.google.inject.Inject;
 
@@ -42,9 +42,9 @@ public class MessagePersistenceManager {
             return documentMessage;
         }
 
-        String pageRankClass = InheritedPageRank.class.getCanonicalName();
-        if(message.getAttachmentClassname().equals(pageRankClass)) {
-            InheritPageRankMessage pageRankMessage = gson.fromJson(json, InheritPageRankMessage.class);
+        String linkTrustClass = InheritedLinkTrust.class.getCanonicalName();
+        if(message.getAttachmentClassname().equals(linkTrustClass)) {
+            InheritLinkTrustMessage pageRankMessage = gson.fromJson(json, InheritLinkTrustMessage.class);
             return pageRankMessage;
         }
 

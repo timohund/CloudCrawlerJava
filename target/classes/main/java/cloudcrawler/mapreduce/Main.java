@@ -2,14 +2,14 @@ package cloudcrawler.mapreduce;
 
 import cloudcrawler.mapreduce.crawler.CrawlingMapper;
 import cloudcrawler.mapreduce.crawler.CrawlingReducer;
-import cloudcrawler.mapreduce.siterank.PageRankMapper;
-import cloudcrawler.mapreduce.siterank.PageRankReducer;
+import cloudcrawler.mapreduce.trust.LinkTrustMapper;
+import cloudcrawler.mapreduce.trust.LinkTrustReducer;
+import com.hadoop.mapreduce.LzoTextInputFormat;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.KeyValueTextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 /**
@@ -38,7 +38,8 @@ public class Main {
             job.setReducerClass(CrawlingReducer.class);
             job.setOutputKeyClass(Text.class);
             job.setOutputValueClass(Text.class);
-            job.setInputFormatClass(KeyValueTextInputFormat.class);
+            job.setInputFormatClass(LzoTextInputFormat.class);
+            job.setNumReduceTasks(15);
 
             FileInputFormat.addInputPath(job, new Path(args[1]));
             FileOutputFormat.setOutputPath(job, new Path(args[2]));
@@ -48,12 +49,14 @@ public class Main {
         if(action.equals("pagerank")) {
             Job job = new Job(conf, "cloudcrawler - pagerank");
             job.setJarByClass(Main.class);
-            job.setMapperClass(PageRankMapper.class);
+            job.setMapperClass(LinkTrustMapper.class);
 
-            job.setReducerClass(PageRankReducer.class);
+            job.setReducerClass(LinkTrustReducer.class);
             job.setOutputKeyClass(Text.class);
             job.setOutputValueClass(Text.class);
-            job.setInputFormatClass(KeyValueTextInputFormat.class);
+
+            job.setInputFormatClass(LzoTextInputFormat.class);
+            job.setNumReduceTasks(15);
 
             FileInputFormat.addInputPath(job, new Path(args[1]));
             FileOutputFormat.setOutputPath(job, new Path(args[2]));

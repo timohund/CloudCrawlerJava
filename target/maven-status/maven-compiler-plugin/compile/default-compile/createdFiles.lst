@@ -7,6 +7,7 @@ cloudcrawler/domain/crawler/schedule/EverythingDirectlyStrategy.class
 cloudcrawler/domain/crawler/robotstxt/rules/SimpleRobotRules.class
 cloudcrawler/domain/crawler/robotstxt/RobotsTxtService.class
 cloudcrawler/mapreduce/siterank/PageRankReducer.class
+cloudcrawler/mapreduce/AbstractMapper.class
 cloudcrawler/system/charset/converter/ConversionResult.class
 cloudcrawler/domain/crawler/Service.class
 cloudcrawler/domain/crawler/trust/Service.class

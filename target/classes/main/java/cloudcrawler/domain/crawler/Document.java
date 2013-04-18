@@ -35,7 +35,7 @@ public class Document {
 
     protected int rankAnalyzeCount = 0;
 
-    protected double rank = 0.0;
+    protected double linkTrust = 0.0;
 
     protected HashMap<String,Link> incomingLinks = new HashMap<String, Link>();
 
@@ -119,11 +119,11 @@ public class Document {
         this.rankAnalyzeCount++;
     }
 
-    public double getRank() {
-        return rank;
+    public double getLinkTrust() {
+        return linkTrust;
     }
 
-    public void setRank(double rank) {
-        this.rank = rank;
+    public void setLinkTrust(double linkTrust) {
+        this.linkTrust = linkTrust;
     }
 }

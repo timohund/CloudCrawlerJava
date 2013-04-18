@@ -77,7 +77,6 @@
             <artifactId>crawler-commons</artifactId>
             <version>0.1</version>
         </dependency>
-
         <dependency>
             <groupId>com.google.code.simple-spring-memcached</groupId>
             <artifactId>spymemcached</artifactId>
