@@ -4,11 +4,25 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 /**
- * Created with IntelliJ IDEA.
- * User: timo
- * Date: 29.03.13
- * Time: 12:45
- * To change this template use File | Settings | File Templates.
+ * During the mapping process a new document is created for every found link.
+ *
+ * Because of this it is possible that multiple documents for the same url
+ * exist after the mapping process.
+ *
+ * To avoid that we have multiple documents for the same url in the end
+ * the reducer process is responsible to merge multiple documents for the same url.
+ *
+ * The following rules are applied:
+ *
+ * When we have a document that was allready crawled, it is used as the "master" document.
+ * Only one document per url should exist in the state crawled.
+ *
+ * All incoming Links from every document are merged into the master document to
+ * keep the incoming link information.
+ *
+ * Finally the merger has one master document with all incoming links, also from the slave documents.
+ *
+ * @author Timo Schmidt <timo.schmidt@gmx.net>
  */
 public class DocumentMerger {
 
@@ -23,6 +37,8 @@ public class DocumentMerger {
     }
 
     /**
+     * Determines the master document (the one which was crawled)
+     * and merges new created slave documents.
      *
      * @param key
      * @param document
@@ -41,13 +57,11 @@ public class DocumentMerger {
             }
 
             HashMap<String,Link> links =  slaveDocument.getIncomingLinks();
-
             if(links != null) {
                 Iterator iterator = links.keySet().iterator();
                 while(iterator.hasNext()) {
                     String linkKey = iterator.next().toString();
                     Link linkToAdd = links.get(linkKey);
-                    // weiterverabeitung der Werte...
                     masterDocument.addIncomingLink(linkToAdd);
                 }
             }

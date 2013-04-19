@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<configuration>
+    <property>
+        <name>robotstxt.cache.class</name>
+        <value>cloudcrawler.domain.crawler.robotstxt.cache.MemCache</value>
+    </property>
+    <property>
+        <name>cache.memcache.hostname</name>
+        <value>127.0.0.1</value>
+    </property>
+    <property>
+        <name>cache.memcache.port</name>
+        <value>11211</value>
+    </property>
+    <property>
+        <name>indexer.index.class</name>
+        <value>cloudcrawler.domain.indexer.solr.SolrIndexer</value>
+    </property>
+
+    <property>
+        <name>indexer.solr.hostname</name>
+        <value></value>
+    </property>
+    <property>
+        <name>indexer.solr.port</name>
+        <value></value>
+    </property>
+    <property>
+        <name>indexer.solr.corename</name>
+        <value></value>
+    </property>
+
+</configuration>

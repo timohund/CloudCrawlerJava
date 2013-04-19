@@ -410,7 +410,7 @@ public class SimpleRobotRulesParser extends BaseRobotsParser {
                 default:
                     // All others we just ignore
                     // TODO KKr - which of these should be setting finishedAgentFields to true?
-                    // TODO KKr - handle no-index
+                    // TODO KKr - handle no-indexer
                     // TODO KKr - handle request-rate and visit-time
                     break;
             }

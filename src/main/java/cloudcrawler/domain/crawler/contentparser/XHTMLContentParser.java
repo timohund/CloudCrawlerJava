@@ -28,7 +28,7 @@ import java.util.Vector;
  *
  * @author Timo Schmidt <timo-schmidt@gmx.net>
  */
-public class XHTMLContentParser extends XMLContentParser {
+public class XHTMLContentParser {
 
     protected Document document;
 
@@ -36,13 +36,30 @@ public class XHTMLContentParser extends XMLContentParser {
 
     protected URIUnifier uriUni;
 
+    protected URI   sourceUri;
+
+    protected String sourceContent;
+
+    protected String mimeType;
+
     @Inject
     public void setURIUnifier(URIUnifier uriUni) {
         this.uriUni = uriUni;
-
     }
 
-    @Override
+    /**
+     * @param sourceUri
+     * @param sourceContent
+     * @param mimeType
+     */
+    public void initialize(URI sourceUri, String sourceContent, String mimeType) throws IOException, SAXException, ParserConfigurationException {
+        this.sourceUri = sourceUri;
+        this.sourceContent = sourceContent;
+        this.mimeType = mimeType;
+
+        this.afterInitialize();
+    }
+
     protected void afterInitialize() throws ParserConfigurationException, IOException, SAXException {
         InputStream stream = IOUtils.toInputStream(this.sourceContent);
 
