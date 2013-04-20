@@ -1,0 +1,15 @@
+http://www.berlin.de/.*
+http://www.hessen.de/.*
+http://www.bayern.de/.*
+http://sachsen.de/.*
+http://www.niedersachsen.de/.*
+http://www.nrw.de/.*
+http://www.rlp.de/.*
+http://www.baden-wuerttemberg.de/.*
+http://www.bremen.de/.*
+http://www.thueringen.de/.*
+http://www.brandenburg.de/.*
+http://www.schleswig-holstein.de/.*
+http://www.hamburg.de/.*
+http://www.sachsen-anhalt.de/.*
+http://www.mecklenburg-vorpommern.de/.*

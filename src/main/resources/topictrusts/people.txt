@@ -1,0 +1,5 @@
+http://www.fomedien.de/.*
+http://www.buse.de/.*
+http://www.skwp.de/.*
+http://www.dr-rat.de/.*
+http://www.georg-schmid.de/.*

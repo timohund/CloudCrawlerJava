@@ -1,7 +1,11 @@
 package cloudcrawler.domain.crawler;
 
 
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.net.URI;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 
 /**
@@ -38,6 +42,20 @@ public class Document {
     protected double linkTrust = 0.0;
 
     protected HashMap<String,Link> incomingLinks = new HashMap<String, Link>();
+
+    public String getId() throws UnsupportedEncodingException, NoSuchAlgorithmException {
+        MessageDigest m = MessageDigest.getInstance("MD5");
+        m.reset();
+        m.update(this.getUri().toString().getBytes());
+        byte[] digest = m.digest();
+        BigInteger bigInt = new BigInteger(1,digest);
+        String hashtext = bigInt.toString(16);
+        while(hashtext.length() < 32 ){
+            hashtext = "0"+hashtext;
+        }
+
+        return hashtext;
+    }
 
     public URI getUri() {
         return uri;

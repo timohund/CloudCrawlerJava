@@ -31,7 +31,6 @@ public class IndexerMapper extends AbstractMapper {
         injector = CloudCrawlerModule.getConfiguredInjector();
         this.setMessageManager(injector.getInstance(MessagePersistenceManager.class));
         this.setIndexer(injector.getInstance(Indexer.class));
-        indexer.flush();
     }
 
     /**

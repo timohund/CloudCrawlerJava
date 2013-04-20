@@ -2,6 +2,7 @@ package cloudcrawler.domain.indexer.solr;
 
 import cloudcrawler.domain.crawler.Document;
 import cloudcrawler.domain.crawler.Link;
+import cloudcrawler.domain.crawler.contentparser.XHTMLContentParser;
 import cloudcrawler.domain.indexer.Indexer;
 import cloudcrawler.system.configuration.ConfigurationManager;
 import com.google.inject.Inject;
@@ -28,6 +29,8 @@ public class SolrIndexer implements Indexer {
 
     Collection<SolrInputDocument> indexedDocs = null;
 
+    XHTMLContentParser parser = null;
+
     int addWhenDocCountReached = 10;
 
     int docCount = 0;
@@ -36,14 +39,14 @@ public class SolrIndexer implements Indexer {
      * @param configurationManager
      */
     @Inject
-    public SolrIndexer(ConfigurationManager configurationManager) throws MalformedURLException {
+    public SolrIndexer(ConfigurationManager configurationManager, XHTMLContentParser parser) throws MalformedURLException {
         String hostname     = configurationManager.getFromConfiguration("indexer.solr.hostname","127.0.0.1");
         String port         = configurationManager.getFromConfiguration("indexer.solr.port","8080");
         String corename     = configurationManager.getFromConfiguration("indexer.solr.corename","cloudcrawler");
 
         String url          = "http://"+hostname+":"+port+"/solr/"+corename;
         solrServer          = new HttpSolrServer(url);
-
+        this.parser         = parser;
         this.reset();
     }
 
@@ -61,12 +64,18 @@ public class SolrIndexer implements Indexer {
     public void index(Document document) throws Exception {
         SolrInputDocument solrDocument = new SolrInputDocument();
 
-        solrDocument.setField("id", UUID.randomUUID());
+        parser.initialize(document.getUri(),document.getContent(),document.getMimeType());
+
+        solrDocument.setField("id", document.getId());
         solrDocument.setField("url",document.getUri().toString());
+        solrDocument.setField("title", parser.getTitle());
 
             //@todo find a smarter way to get text and evaluate jsoup for general extraction
         String content = document.getContent();
         solrDocument.setField("content", Jsoup.parse(content).text());
+        solrDocument.setField("domain_s",document.getUri().getHost());
+        solrDocument.setField("path_s",document.getUri().getPath());
+        solrDocument.setField("source_s","cloudcrawler");
         solrDocument.setField("linktrust_d",document.getLinkTrust());
 
         HashMap<String,Link> links = document.getIncomingLinks();

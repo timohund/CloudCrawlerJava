@@ -181,4 +181,26 @@ public class XHTMLContentParser {
         }
         return aHref;
     }
+
+    /**
+     * Returns the title of the document.
+     *
+     * @return
+     */
+    public String getTitle() {
+        String title = new String("");
+
+        NodeList titleNodes = document.getElementsByTagName("title");
+        if(titleNodes.getLength() > 0) {
+            try {
+                Node firstNode = titleNodes.item(0);
+                title = firstNode.getTextContent().trim();
+            } catch(NullPointerException e) {
+
+            }
+        }
+
+
+        return title;
+    }
 }
