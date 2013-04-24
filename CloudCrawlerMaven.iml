@@ -84,6 +84,12 @@
     <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpmime:4.2.3" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: org.codehaus.woodstox:wstx-asl:3.2.7" level="project" />
     <orderEntry type="library" name="Maven: org.jsoup:jsoup:1.7.2" level="project" />
+    <orderEntry type="library" name="Maven: org.elasticsearch:elasticsearch:0.20.6" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.lucene:lucene-core:3.6.2" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.lucene:lucene-analyzers:3.6.2" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.lucene:lucene-queries:3.6.2" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.lucene:lucene-memory:3.6.2" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.lucene:lucene-highlighter:3.6.2" level="project" />
   </component>
 </module>
 

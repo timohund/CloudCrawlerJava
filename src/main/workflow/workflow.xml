@@ -1,0 +1,39 @@
+<workflow-app name='crawl-wf' xmlns="uri:oozie:workflow:0.2">
+    <start to='crawl'/>
+    <action name='crawl'>
+        <map-reduce>
+            <job-tracker>${jobTracker}</job-tracker>
+            <name-node>${nameNode}</name-node>
+            <prepare>
+            </prepare>
+            <configuration>
+                <property>
+                    <name>mapred.job.queue.name</name>
+                    <value>${queueName}</value>
+                </property>
+                <property>
+                    <name>mapred.mapper.class</name>
+                    <value>org.cloudcrawler.controller.mapreduce.crawler.CrawlingMapper</value>
+                </property>
+                <property>
+                    <name>mapred.reducer.class</name>
+                    <value>org.cloudcrawler.controller.mapreduce.crawler.CrawlingReducer</value>
+                </property>
+                <property>
+                    <name>mapred.input.dir</name>
+                    <value>${inputDir}/crawl/start</value>
+                </property>
+                <property>
+                    <name>mapred.output.dir</name>
+                    <value>${outputDir}/crawl/out1</value>
+                </property>
+            </configuration>
+        </map-reduce>
+        <ok to='end'/>
+        <error to='end'/>
+    </action>
+    <kill name='kill'>
+        <value>${wf:errorCode("crawl")}</value>
+    </kill>
+    <end name='end'/>
+</workflow-app>

@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<configuration>
+    <property>
+        <name>robotstxt.cache.class</name>
+        <value>org.cloudcrawler.domain.crawler.robotstxt.cache.MemCache</value>
+    </property>
+    <property>
+        <name>cache.memcache.hostname</name>
+        <value>127.0.0.1</value>
+    </property>
+    <property>
+        <name>cache.memcache.port</name>
+        <value>11211</value>
+    </property>
+<!--    <property>
+        <name>indexer.index.class</name>
+        <value>org.cloudcrawler.domain.indexer.solr.SolrIndexer</value>
+    </property>
+    <property>
+        <name>indexer.solr.hostname</name>
+        <value></value>
+    </property>
+    <property>
+        <name>indexer.solr.port</name>
+        <value></value>
+    </property>
+    <property>
+        <name>indexer.solr.corename</name>
+        <value></value>
+    </property>
+-->
+    <property>
+        <name>indexer.index.class</name>
+        <value>org.cloudcrawler.domain.indexer.elasticsearch.ElasticSearchIndexer</value>
+    </property>
+    <property>
+        <name>indexer.elasticsearch.hostname</name>
+        <value>localhost</value>
+    </property>
+    <property>
+        <name>indexer.elasticsearch.port</name>
+        <value>9300</value>
+    </property>
+    <property>
+        <name>indexer.elasticsearch.index</name>
+        <value>cloudcrawler</value>
+    </property>
+
+</configuration>

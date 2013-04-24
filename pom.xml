@@ -92,9 +92,14 @@
             <artifactId>jsoup</artifactId>
             <version>1.7.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <version>0.20.6</version>
+        </dependency>
     </dependencies>
     <build>
-        <finalName>test</finalName>
+        <finalName>org.cloudcrawler</finalName>
         <resources>
             <resource>
                 <directory>${project.basedir}/src</directory>
@@ -135,7 +140,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>cloudcrawler.controller.mapreduce.Main</mainClass>
+                            <mainClass>org.cloudcrawler.controller.mapreduce.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
