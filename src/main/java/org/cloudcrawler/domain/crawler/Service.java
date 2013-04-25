@@ -78,7 +78,7 @@ public class Service {
                 return results;
             }
 
-            HttpResponse getResponse = httpService.getUriWithGet(toCrawl.getUri());
+            HttpResponse getResponse = httpService.get(toCrawl.getUri());
             Header header = getResponse.getLastHeader(new String("Content-Type"));
             String getMimeType = header.getValue();
 
@@ -174,7 +174,7 @@ public class Service {
      * @throws IOException
      */
     private boolean getHeadRequestIndicatesUnAllowedContentType(Document toCrawl) throws IOException {
-        HttpResponse headResponse = httpService.getUrlWithHead(toCrawl.getUri());
+        HttpResponse headResponse = httpService.head(toCrawl.getUri());
         Header header = headResponse.getLastHeader(new String("Content-Type"));
         Boolean isHeadIndicatingHtml = header.getValue().contains(new String("text/html"));
         this.httpService.close(headResponse);

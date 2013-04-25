@@ -84,7 +84,7 @@ public class Main {
     }
 
     protected static ConfigurationManager getConfigurationManager(String[] args) throws IOException {
-        ConfigurationManager configurationManager = ConfigurationManager.getInstance();
+        ConfigurationManager configurationManager = ConfigurationManager.getInstance(true);
         if(args[3] != null && !args[3].trim().equals("")) {
             System.out.println("Trying to load passed configuration "+args[3]);
             if(configurationManager.loadAdditionalConfiguration(args[3])) {

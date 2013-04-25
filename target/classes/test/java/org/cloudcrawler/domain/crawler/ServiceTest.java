@@ -60,14 +60,14 @@ public class ServiceTest {
         document.setUri(new URI("http://www.google.de/"));
 
             //when the head request is indicating an mpeg there should never be a get request triggered
-        expect(httpServiceMock.getUriWithGet(isA(URI.class))).andThrow(new AssertionFailedError()).anyTimes();
+        expect(httpServiceMock.get(isA(URI.class))).andThrow(new AssertionFailedError()).anyTimes();
             //since we do not want to test the robots txt service here we mock it with allways allow
         expect(robotsTxtServiceMock.isAllowedUri(isA(URI.class))).andReturn(true).anyTimes();
 
         HttpResponse httpResponseMock   = EasyMock.createMock(HttpResponse.class);
         Header httpHeaderMock           = EasyMock.createMock(Header.class);
 
-        expect(httpServiceMock.getUrlWithHead(isA(URI.class))).andReturn(httpResponseMock);
+        expect(httpServiceMock.head(isA(URI.class))).andReturn(httpResponseMock);
         expect(httpResponseMock.getLastHeader(isA(String.class))).andReturn(httpHeaderMock);
         expect(httpHeaderMock.getValue()).andReturn("mpeg");
         expect(httpServiceMock.close(isA(HttpResponse.class))).andReturn(true);
@@ -107,13 +107,13 @@ public class ServiceTest {
         HttpResponse httpResponseMock   = EasyMock.createMock(HttpResponse.class);
         Header httpHeaderMock           = EasyMock.createMock(Header.class);
 
-        expect(httpServiceMock.getUrlWithHead(isA(URI.class))).andReturn(httpResponseMock);
+        expect(httpServiceMock.head(isA(URI.class))).andReturn(httpResponseMock);
         expect(httpResponseMock.getLastHeader(isA(String.class))).andReturn(httpHeaderMock);
         expect(httpHeaderMock.getValue()).andReturn("text/html");
         expect(httpServiceMock.close(isA(HttpResponse.class))).andReturn(true);
 
             //now the get request
-        expect(httpServiceMock.getUriWithGet(isA(URI.class))).andReturn(httpResponseMock);
+        expect(httpServiceMock.get(isA(URI.class))).andReturn(httpResponseMock);
         expect(httpResponseMock.getLastHeader(isA(String.class))).andReturn(httpHeaderMock);
         expect(httpHeaderMock.getValue()).andReturn("appclication/pdf");
  //TODO: This seems to be a bug

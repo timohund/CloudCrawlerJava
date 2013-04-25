@@ -71,7 +71,7 @@ public class RobotsTxtService {
         BaseRobotRules rules    = (BaseRobotRules) cache.get(robotsTxtUri.toString());
 
         if(rules == null) {
-            HttpResponse response = httpService.getUriWithGet(robotsTxtUri);
+            HttpResponse response = httpService.get(robotsTxtUri);
 
             try {
 

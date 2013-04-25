@@ -15,7 +15,7 @@ import java.io.IOException;
  *
  * and provide access to the configuration in an injectable singleton.
  *
- * This class is a singlton but can not be a guice singleton since it is
+ * This class is a singleton but can not be a guice singleton since it is
  * required before a module gets creates
  *
  * @author Timo Schmidt <timo.schmidt@gmx.net>
@@ -26,8 +26,16 @@ public class ConfigurationManager {
 
     private static ConfigurationManager instance = null;
 
-    private ConfigurationManager() {
-        conf = new Configuration();
+    /**
+     * @param loadBasicConfiguration
+     */
+    private ConfigurationManager(boolean loadBasicConfiguration) {
+        this.setConfiguration(new Configuration(loadBasicConfiguration));
+    }
+
+
+    public void setConfiguration(Configuration conf) {
+        this.conf = conf;
     }
 
     /**
@@ -72,13 +80,24 @@ public class ConfigurationManager {
     }
 
     /**
+     * @param loadBasicConfiguration
      * @return ConfigurationManager
      */
-    public static ConfigurationManager getInstance() {
+    public static ConfigurationManager getInstance(boolean loadBasicConfiguration) {
         if(instance == null) {
-            instance = new ConfigurationManager();
+            instance = new ConfigurationManager(loadBasicConfiguration);
         }
 
         return instance;
     }
+
+    /**
+     * Flushes the singleton instance in testing context.
+     *
+     * @return void
+     */
+    public static void flushInstance() {
+       instance = null;
+    }
 }
+

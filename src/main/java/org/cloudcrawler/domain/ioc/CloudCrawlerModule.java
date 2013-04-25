@@ -37,7 +37,7 @@ public class CloudCrawlerModule implements Module {
         try {
             binder.bind(CrawlingScheduleStrategy.class).to(FixedAmountPerRunStrategy.class);
             binder.bind(Cache.class).to(getRobotsTxtCacheClass());
-            binder.bind(ConfigurationManager.class).toInstance(ConfigurationManager.getInstance());
+            binder.bind(ConfigurationManager.class).toInstance(ConfigurationManager.getInstance(true));
             binder.bind(Indexer.class).to(getIndexerClass());
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -66,7 +66,7 @@ public class CloudCrawlerModule implements Module {
      * @return Injector
      */
     public static Injector getConfiguredInjector() {
-        CloudCrawlerModule module = new CloudCrawlerModule(ConfigurationManager.getInstance());
+        CloudCrawlerModule module = new CloudCrawlerModule(ConfigurationManager.getInstance(true));
         return Guice.createInjector(module);
     }
 }

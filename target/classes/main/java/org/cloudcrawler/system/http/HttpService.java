@@ -1,5 +1,7 @@
 package org.cloudcrawler.system.http;
 
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -19,21 +21,32 @@ public class HttpService {
 
     HttpClient client;
 
-    public HttpService() {
+    Injector injector;
+
+    @Inject
+    public HttpService(Injector injector) {
+        this.injector = injector;
         this.init();
     }
 
+    /**
+     * ReInitializes the httpService
+     * @return void
+     */
     protected void init() {
-        client = new DefaultHttpClient() ;
-        HttpParams httpParam = client.getParams();
+        client = this.injector.getInstance(DefaultHttpClient.class);
 
+        HttpParams httpParam = client.getParams();
         HttpConnectionParams.setConnectionTimeout(httpParam, 10 * 1000);
         HttpConnectionParams.setSoTimeout(httpParam, 10 * 1000);
 
         client.getParams().setParameter(CoreProtocolPNames.USER_AGENT, userAgent);
-
     }
 
+    /**
+     * Closes the current connection and prepares the HttpService for a new request.
+     * @return void
+     */
     public boolean reset() {
         client.getConnectionManager().shutdown();
         this.init();
@@ -41,12 +54,13 @@ public class HttpService {
     }
 
     /**
+     * Perform a head request.
      *
      * @param uri
      * @return
      * @throws java.io.IOException
      */
-    public HttpResponse getUrlWithHead(URI uri) throws IOException {
+    public HttpResponse head(URI uri) throws IOException {
         HttpHead headRequest;
 
         headRequest = new HttpHead();
@@ -57,12 +71,13 @@ public class HttpService {
     }
 
     /**
+     * Perform a get request
      *
      * @param uri
      * @return HttpResponse
      * @throws java.io.IOException
      */
-    public HttpResponse getUriWithGet(URI uri) throws IOException {
+    public HttpResponse get(URI uri) throws IOException {
         HttpGet getRequest;
 
         getRequest = new HttpGet();
@@ -74,6 +89,7 @@ public class HttpService {
     }
 
     /**
+     * Closes the connection for a response.
      *
      * @param response
      */
@@ -84,11 +100,12 @@ public class HttpService {
         return true;
     }
 
+    /**
+     * Return the useragent of the crawler.
+     *
+     * @return
+     */
     public String getUserAgent() {
         return userAgent;
-    }
-
-    public void setUserAgent(String userAgent) {
-        this.userAgent = userAgent;
     }
 }
