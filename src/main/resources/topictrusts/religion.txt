@@ -1,8 +1,0 @@
-http://www.evangelisch.de/.*
-http://www.dbk.de/.*
-http://www.ekd.de/.*
-http://www.feg.de/.*
-http://www.jesus.de/.*
-http://www.erf.de/.*
-http://www.nordkirche.de/.*
-http://www.drs.de/.*

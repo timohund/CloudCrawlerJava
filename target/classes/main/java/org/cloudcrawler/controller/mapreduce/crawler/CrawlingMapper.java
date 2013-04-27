@@ -1,13 +1,14 @@
 package org.cloudcrawler.controller.mapreduce.crawler;
 
+import com.google.inject.Injector;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.Text;
+import org.cloudcrawler.controller.mapreduce.AbstractMapper;
 import org.cloudcrawler.domain.crawler.Document;
 import org.cloudcrawler.domain.crawler.Service;
 import org.cloudcrawler.domain.crawler.message.DocumentMessage;
 import org.cloudcrawler.domain.crawler.message.MessagePersistenceManager;
 import org.cloudcrawler.domain.ioc.CloudCrawlerModule;
-import org.cloudcrawler.controller.mapreduce.AbstractMapper;
-import com.google.inject.Injector;
-import org.apache.hadoop.io.Text;
 
 import java.io.IOException;
 import java.net.URI;
@@ -19,25 +20,13 @@ public class CrawlingMapper extends AbstractMapper {
 
     protected Injector injector;
 
-    public CrawlingMapper() {
-            //since the Crawling mapper is instanciated in hadoop
-            //we inject the dependecies by our own
-        injector = CloudCrawlerModule.getConfiguredInjector();
-        this.setMessageManager(injector.getInstance(MessagePersistenceManager.class));
-        this.setCrawlingService(injector.getInstance(Service.class));
+
+    public void setInjector(Injector injector) {
+        this.injector = injector;
     }
 
     public void setCrawlingService(Service crawlingService) {
         this.crawlingService = crawlingService;
-    }
-
-    /**
-     * @param messageManager
-     * @param service
-     */
-    public CrawlingMapper(MessagePersistenceManager messageManager, Service service) {
-        this.setMessageManager(messageManager);
-        this.setCrawlingService(service);
     }
 
     /**
@@ -57,6 +46,20 @@ public class CrawlingMapper extends AbstractMapper {
         context.write(key, crawlingResultValue);
     }
 
+    protected void initialize(Configuration configuration) {
+        if(this.injector == null) {
+            this.injector = CloudCrawlerModule.getConfiguredInjector(configuration);
+        }
+
+        if(this.messageManager == null) {
+            this.setMessageManager(injector.getInstance(MessagePersistenceManager.class));
+        }
+
+        if(this.crawlingService == null) {
+            this.setCrawlingService(injector.getInstance(Service.class));
+        }
+    }
+
     /**
      *
      * @param key
@@ -67,6 +70,7 @@ public class CrawlingMapper extends AbstractMapper {
      */
     public void map(Text key, Text value, Context context) throws IOException, InterruptedException {
         try {
+            this.initialize(context.getConfiguration());
                //when the key is empty we skip the row
             if(key.toString().trim() == "") {   return;  }
                 //create or retrieve the crawling document from json

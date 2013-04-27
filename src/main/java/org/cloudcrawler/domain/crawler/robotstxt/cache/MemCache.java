@@ -5,12 +5,12 @@ package org.cloudcrawler.domain.crawler.robotstxt.cache;
  *
  */
 
-import org.cloudcrawler.system.configuration.ConfigurationManager;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import net.spy.memcached.AddrUtil;
 import net.spy.memcached.BinaryConnectionFactory;
 import net.spy.memcached.MemcachedClient;
+import org.apache.hadoop.conf.Configuration;
 
 import java.io.IOException;
 
@@ -25,9 +25,9 @@ public class MemCache implements Cache {
      * @throws IOException
      */
     @Inject
-    public MemCache(ConfigurationManager configurationManager) throws IOException {
-        String host     = configurationManager.getConfiguration().get("cache.memcache.hostname", "127.0.0.1");
-        String port     = configurationManager.getConfiguration().get("cache.memcache.port","11211");
+    public MemCache(Configuration configuration) throws IOException {
+        String host     = configuration.get("cache.memcache.hostname", "127.0.0.1");
+        String port     = configuration.get("cache.memcache.port","11211");
         String address  = host+":"+port;
 
         memCacheClient  = new MemcachedClient(

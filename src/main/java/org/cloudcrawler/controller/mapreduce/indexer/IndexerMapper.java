@@ -1,5 +1,8 @@
 package org.cloudcrawler.controller.mapreduce.indexer;
 
+import com.google.inject.Injector;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.Text;
 import org.cloudcrawler.controller.mapreduce.AbstractMapper;
 import org.cloudcrawler.domain.crawler.Document;
 import org.cloudcrawler.domain.crawler.message.DocumentMessage;
@@ -7,8 +10,6 @@ import org.cloudcrawler.domain.crawler.message.Message;
 import org.cloudcrawler.domain.crawler.message.MessagePersistenceManager;
 import org.cloudcrawler.domain.indexer.Indexer;
 import org.cloudcrawler.domain.ioc.CloudCrawlerModule;
-import com.google.inject.Injector;
-import org.apache.hadoop.io.Text;
 
 import java.io.IOException;
 
@@ -25,19 +26,25 @@ public class IndexerMapper extends AbstractMapper {
 
     protected Injector injector;
 
-    public IndexerMapper() throws Exception{
-        //since the Crawling mapper is instanciated in hadoop
-        //we inject the dependecies by our own
-        injector = CloudCrawlerModule.getConfiguredInjector();
-        this.setMessageManager(injector.getInstance(MessagePersistenceManager.class));
-        this.setIndexer(injector.getInstance(Indexer.class));
-    }
-
     /**
      * @param indexer
      */
     public void setIndexer(Indexer indexer) {
         this.indexer = indexer;
+    }
+
+    public void initialize(Configuration configuration) throws Exception{
+        if(this.injector == null) {
+            this.injector = CloudCrawlerModule.getConfiguredInjector(configuration);
+        }
+
+        if(this.messageManager == null) {
+            this.setMessageManager(injector.getInstance(MessagePersistenceManager.class));
+        }
+
+        if(this.indexer == null) {
+            this.setIndexer(injector.getInstance(Indexer.class));
+        }
     }
 
     /**
@@ -50,6 +57,7 @@ public class IndexerMapper extends AbstractMapper {
      */
     public void map(Text key, Text value, Context context) throws IOException, InterruptedException {
         try {
+            this.initialize(context.getConfiguration());
             Message message = this.messageManager.wakeup(value.toString());
 
             if(!message.getAttachmentClassname().endsWith("Document")) {

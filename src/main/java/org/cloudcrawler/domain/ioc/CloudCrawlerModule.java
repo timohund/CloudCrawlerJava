@@ -4,7 +4,6 @@ import org.cloudcrawler.domain.crawler.robotstxt.cache.Cache;
 import org.cloudcrawler.domain.crawler.schedule.CrawlingScheduleStrategy;
 import org.cloudcrawler.domain.crawler.schedule.FixedAmountPerRunStrategy;
 import org.cloudcrawler.domain.indexer.Indexer;
-import org.cloudcrawler.system.configuration.ConfigurationManager;
 import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -20,16 +19,15 @@ import org.apache.hadoop.conf.Configuration;
  */
 public class CloudCrawlerModule implements Module {
 
-    protected ConfigurationManager configurationManager;
 
     protected Configuration configuration;
 
     /**
-     * @param configurationManager
+     * @param configuration
      */
-    public CloudCrawlerModule(ConfigurationManager configurationManager) {
-        this.configurationManager = configurationManager;
-        configuration = configurationManager.getConfiguration();
+    public CloudCrawlerModule(Configuration configuration) {
+        this.configuration = configuration;
+
     }
 
     @Override
@@ -37,7 +35,6 @@ public class CloudCrawlerModule implements Module {
         try {
             binder.bind(CrawlingScheduleStrategy.class).to(FixedAmountPerRunStrategy.class);
             binder.bind(Cache.class).to(getRobotsTxtCacheClass());
-            binder.bind(ConfigurationManager.class).toInstance(ConfigurationManager.getInstance(true));
             binder.bind(Indexer.class).to(getIndexerClass());
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -65,8 +62,8 @@ public class CloudCrawlerModule implements Module {
     /**
      * @return Injector
      */
-    public static Injector getConfiguredInjector() {
-        CloudCrawlerModule module = new CloudCrawlerModule(ConfigurationManager.getInstance(true));
+    public static Injector getConfiguredInjector(Configuration configuration) {
+        CloudCrawlerModule module = new CloudCrawlerModule(configuration);
         return Guice.createInjector(module);
     }
 }

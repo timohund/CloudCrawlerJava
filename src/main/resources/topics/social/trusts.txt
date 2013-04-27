@@ -1,0 +1,4 @@
+http://mut-gegen-rechte-gewalt.de/.*
+http://www.netz-gegen-nazis.de/.*
+http://www.aerzte-ohne-grenzen.de/.*
+http://www.tafel.de/.*

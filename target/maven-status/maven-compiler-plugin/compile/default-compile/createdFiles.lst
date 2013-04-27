@@ -42,7 +42,6 @@ org/cloudcrawler/domain/crawler/schedule/EverythingDirectlyStrategy.class
 org/cloudcrawler/domain/crawler/trust/link/InheritedLinkTrust.class
 org/cloudcrawler/domain/crawler/robotstxt/cache/Cache.class
 org/cloudcrawler/system/uri/URIUnifier.class
-org/cloudcrawler/system/configuration/ConfigurationManager.class
 org/cloudcrawler/domain/crawler/schedule/FixedAmountPerRunStrategy.class
 org/cloudcrawler/domain/crawler/robotstxt/RobotsTxtService.class
 org/cloudcrawler/system/charset/converter/ConversionResult.class

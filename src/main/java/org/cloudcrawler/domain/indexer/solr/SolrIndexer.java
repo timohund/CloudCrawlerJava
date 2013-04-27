@@ -1,21 +1,24 @@
 package org.cloudcrawler.domain.indexer.solr;
 
-import org.cloudcrawler.domain.crawler.Document;
-import org.cloudcrawler.domain.crawler.Link;
-import org.cloudcrawler.domain.crawler.contentparser.XHTMLContentParser;
-import org.cloudcrawler.domain.indexer.Indexer;
-import org.cloudcrawler.system.configuration.ConfigurationManager;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.common.SolrInputDocument;
+import org.cloudcrawler.domain.crawler.Document;
+import org.cloudcrawler.domain.crawler.Link;
+import org.cloudcrawler.domain.crawler.contentparser.XHTMLContentParser;
+import org.cloudcrawler.domain.indexer.Indexer;
 import org.jsoup.Jsoup;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Implementation to indexer into a solr server.
@@ -36,13 +39,13 @@ public class SolrIndexer implements Indexer {
     int docCount = 0;
 
     /**
-     * @param configurationManager
+     * @param configuration
      */
     @Inject
-    public SolrIndexer(ConfigurationManager configurationManager, XHTMLContentParser parser) throws MalformedURLException {
-        String hostname     = configurationManager.getFromConfiguration("indexer.solr.hostname","127.0.0.1");
-        Integer port        = configurationManager.getConfiguration().getInt("indexer.solr.port",8080);
-        String corename     = configurationManager.getFromConfiguration("indexer.solr.corename","cloudcrawler");
+    public SolrIndexer(Configuration configuration, XHTMLContentParser parser) throws MalformedURLException {
+        String hostname     = configuration.get("indexer.solr.hostname","127.0.0.1");
+        Integer port        = configuration.getInt("indexer.solr.port",8080);
+        String corename     = configuration.get("indexer.solr.corename","cloudcrawler");
 
         String url          = "http://"+hostname+":"+port+"/solr/"+corename;
         solrServer          = new HttpSolrServer(url);

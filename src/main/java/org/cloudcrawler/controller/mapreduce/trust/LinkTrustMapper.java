@@ -1,5 +1,9 @@
 package org.cloudcrawler.controller.mapreduce.trust;
 
+import com.google.inject.Injector;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.Text;
+import org.cloudcrawler.controller.mapreduce.AbstractMapper;
 import org.cloudcrawler.domain.crawler.Document;
 import org.cloudcrawler.domain.crawler.Link;
 import org.cloudcrawler.domain.crawler.contentparser.XHTMLContentParser;
@@ -9,9 +13,6 @@ import org.cloudcrawler.domain.crawler.message.Message;
 import org.cloudcrawler.domain.crawler.message.MessagePersistenceManager;
 import org.cloudcrawler.domain.crawler.trust.link.InheritedLinkTrust;
 import org.cloudcrawler.domain.ioc.CloudCrawlerModule;
-import org.cloudcrawler.controller.mapreduce.AbstractMapper;
-import com.google.inject.Injector;
-import org.apache.hadoop.io.Text;
 
 import java.io.IOException;
 import java.util.Vector;
@@ -29,12 +30,18 @@ public class LinkTrustMapper extends AbstractMapper {
 
     protected XHTMLContentParser xhtmlContentParser;
 
-    public LinkTrustMapper() {
-        //since the Crawling mapper is instanciated in hadoop
-        //we inject the dependecies by our own
-        injector = CloudCrawlerModule.getConfiguredInjector();
-        this.setXhtmlContentParser(injector.getInstance(XHTMLContentParser.class));
-        this.setMessageManager(injector.getInstance(MessagePersistenceManager.class));
+    public void initialize(Configuration configuration) {
+        if(this.injector == null) {
+            this.injector = CloudCrawlerModule.getConfiguredInjector(configuration);
+        }
+
+        if(this.xhtmlContentParser == null) {
+            this.setXhtmlContentParser(injector.getInstance(XHTMLContentParser.class));
+        }
+
+        if(this.messageManager == null) {
+            this.setMessageManager(injector.getInstance(MessagePersistenceManager.class));
+        }
     }
 
     public void setXhtmlContentParser(XHTMLContentParser xhtmlContentParser) {
@@ -51,6 +58,7 @@ public class LinkTrustMapper extends AbstractMapper {
      */
     public void map(Text key, Text value, Context context) throws IOException, InterruptedException {
         try {
+            this.initialize(context.getConfiguration());
             Message message = this.messageManager.wakeup(value.toString());
 
             if(!message.getAttachmentClassname().equals(Document.class.getCanonicalName())) {

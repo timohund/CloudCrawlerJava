@@ -6,15 +6,16 @@ package org.cloudcrawler.controller.mapreduce;
  * @author Timo Schmidt <timo.schmidt@gmx.net>
  */
 
+import com.google.gson.Gson;
+import com.google.inject.Injector;
+import junit.framework.AssertionFailedError;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.cloudcrawler.controller.mapreduce.crawler.CrawlingMapper;
 import org.cloudcrawler.domain.crawler.Document;
 import org.cloudcrawler.domain.crawler.Service;
 import org.cloudcrawler.domain.crawler.message.DocumentMessage;
 import org.cloudcrawler.domain.crawler.message.MessagePersistenceManager;
-import org.cloudcrawler.controller.mapreduce.crawler.CrawlingMapper;
-import com.google.gson.Gson;
-import junit.framework.AssertionFailedError;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Mapper;
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,14 +34,20 @@ public class CrawlingMapperTest {
 
     Service crawlingServiceMock;
 
+    Injector injectorMock;
+
     @Before
     public void setUp() {
         contextMock         = EasyMock.createMock(Mapper.Context.class);
         gson                = new Gson();
         MessagePersistenceManager pm = new MessagePersistenceManager(gson);
         crawlingServiceMock = EasyMock.createMock(Service.class);
+        injectorMock        = EasyMock.createMock(Injector.class);
 
-        mapper = new CrawlingMapper(pm, crawlingServiceMock);
+        mapper = new CrawlingMapper();
+        mapper.setInjector(injectorMock);
+        mapper.setMessageManager(pm);
+        mapper.setCrawlingService(crawlingServiceMock);
     }
 
     @Test
@@ -54,6 +61,9 @@ public class CrawlingMapperTest {
             document.setUri(new URI("http://www.heise.de/"));
             document.setErrorMessage("test exception");
             document.setCrawlingState(Document.CRAWLING_STATE_ERROR);
+
+                //configuration not needed here since dependencies have been injected before
+            expect(contextMock.getConfiguration()).andReturn(null);
 
             Text keyOut     = new Text(document.getUri().toString());
             Text valueOut   = new Text(gson.toJson(expectedOutputMessage));

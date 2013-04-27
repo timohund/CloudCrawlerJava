@@ -1,5 +1,0 @@
-http://www.anatomie.uni-wuerzburg.de/institutelehrstuehle/lehrstuhl_fuer_anatomie_ii/mitarbeiter/prof_detlev_drenckhahn/.*
-http://www.klinik.uni-frankfurt.de/.*
-http://www.riemser.com/.*
-http://www.kbv.de/.*
-http://www.kvhessen.de/.*

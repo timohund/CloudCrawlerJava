@@ -1,0 +1,14 @@
+http://www.uni-hamburg.de/.*
+http://www.uni-mainz.de/.*
+http://www.thm.de/.*
+http://www.tu-berlin.de/.*
+http://www.tu-darmstadt.de/.*
+.*uni-frankfurt.de/.*
+http://www.uni-koeln.de/.*
+http://www.uni-siegen.de/.*
+http://www.uni-muenchen.de/.*
+http://www.unibw.de/.*
+http://www.tum.de/.*
+http://www.uni-hannover.de/.*
+http://www.uni-stuttgart.de/.*
+http://www.uni-giessen.de/.*

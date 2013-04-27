@@ -1,5 +1,10 @@
 package org.cloudcrawler.controller.mapreduce.crawler;
 
+import com.google.gson.JsonIOException;
+import com.google.inject.Injector;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.cloudcrawler.domain.crawler.Document;
 import org.cloudcrawler.domain.crawler.DocumentMerger;
 import org.cloudcrawler.domain.crawler.message.DocumentMessage;
@@ -7,10 +12,6 @@ import org.cloudcrawler.domain.crawler.message.Message;
 import org.cloudcrawler.domain.crawler.message.MessagePersistenceManager;
 import org.cloudcrawler.domain.crawler.schedule.CrawlingScheduleStrategy;
 import org.cloudcrawler.domain.ioc.CloudCrawlerModule;
-import com.google.gson.JsonIOException;
-import com.google.inject.Injector;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -26,13 +27,6 @@ public class CrawlingReducer extends Reducer<Text, Text, Text, Text> {
 
     protected MessagePersistenceManager messageManager;
 
-    public CrawlingReducer() {
-        injector = CloudCrawlerModule.getConfiguredInjector();
-        this.setMessageManager(injector.getInstance(MessagePersistenceManager.class));
-        this.setMerger(injector.getInstance(DocumentMerger.class));
-        this.setCrawlingScheduler(injector.getInstance(CrawlingScheduleStrategy.class));
-    }
-
     public void setMessageManager(MessagePersistenceManager messageManager) {
         this.messageManager = messageManager;
     }
@@ -45,6 +39,24 @@ public class CrawlingReducer extends Reducer<Text, Text, Text, Text> {
         this.crawlingScheduler = crawlingScheduler;
     }
 
+    protected void initialize(Configuration configuration) {
+        if(this.injector == null) {
+            this.injector = CloudCrawlerModule.getConfiguredInjector(configuration);
+        }
+
+        if(this.messageManager == null) {
+            this.setMessageManager(injector.getInstance(MessagePersistenceManager.class));
+        }
+
+        if(this.merger == null) {
+            this.setMerger(injector.getInstance(DocumentMerger.class));
+        }
+
+        if(this.crawlingScheduler == null) {
+            this.setCrawlingScheduler(injector.getInstance(CrawlingScheduleStrategy.class));
+        }
+    }
+
     /**
      * @param key
      * @param values
@@ -54,6 +66,7 @@ public class CrawlingReducer extends Reducer<Text, Text, Text, Text> {
      */
     public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
         try {
+            this.initialize(context.getConfiguration());
             this.merger.reset();
 
             for (Text val : values) {

@@ -1,3 +1,0 @@
-http://www.tuev-sued.de/.*
-http://www.tuev-nord.de/.*
-http://www.tuev-thueringen.de/.*

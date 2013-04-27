@@ -1,3 +1,0 @@
-http://www.sparkasse.de/.*
-http://www.vr.de/.*
-http://www.kfw.de/.*

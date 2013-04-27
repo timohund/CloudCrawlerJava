@@ -1,14 +1,15 @@
 package org.cloudcrawler.controller.mapreduce.trust;
 
+import com.google.gson.JsonIOException;
+import com.google.inject.Injector;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Reducer;
 import org.cloudcrawler.domain.crawler.message.DocumentMessage;
 import org.cloudcrawler.domain.crawler.message.Message;
 import org.cloudcrawler.domain.crawler.message.MessagePersistenceManager;
 import org.cloudcrawler.domain.crawler.trust.link.LinkTrustMerger;
 import org.cloudcrawler.domain.ioc.CloudCrawlerModule;
-import com.google.gson.JsonIOException;
-import com.google.inject.Injector;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
 
@@ -27,10 +28,18 @@ public class LinkTrustReducer extends Reducer<Text, Text, Text, Text> {
 
     protected LinkTrustMerger linkTrustMerger;
 
-    public LinkTrustReducer() {
-        injector = CloudCrawlerModule.getConfiguredInjector();
-        this.setMessageManager(injector.getInstance(MessagePersistenceManager.class));
-        this.setLinkTrustMerger(injector.getInstance(LinkTrustMerger.class));
+    public void initialize(Configuration configuration) {
+        if(this.injector == null) {
+            this.injector = CloudCrawlerModule.getConfiguredInjector(configuration);
+        }
+
+        if(this.messageManager == null) {
+            this.setMessageManager(injector.getInstance(MessagePersistenceManager.class));
+        }
+
+        if(this.linkTrustMerger == null) {
+            this.setLinkTrustMerger(injector.getInstance(LinkTrustMerger.class));
+        }
     }
 
     public void setMessageManager(MessagePersistenceManager messageManager) {
@@ -50,6 +59,7 @@ public class LinkTrustReducer extends Reducer<Text, Text, Text, Text> {
      */
     public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
         try {
+            this.initialize(context.getConfiguration());
             this.linkTrustMerger.reset();
             for (Text val : values) {
                 String json = val.toString();

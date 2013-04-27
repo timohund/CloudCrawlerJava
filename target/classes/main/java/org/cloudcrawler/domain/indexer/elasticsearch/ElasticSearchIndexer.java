@@ -2,10 +2,10 @@ package org.cloudcrawler.domain.indexer.elasticsearch;
 
 import com.google.gson.Gson;
 import com.google.inject.Inject;
+import org.apache.hadoop.conf.Configuration;
 import org.cloudcrawler.domain.crawler.Document;
 import org.cloudcrawler.domain.crawler.contentparser.XHTMLContentParser;
 import org.cloudcrawler.domain.indexer.Indexer;
-import org.cloudcrawler.system.configuration.ConfigurationManager;
 import org.elasticsearch.action.deletebyquery.DeleteByQueryRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.Client;
@@ -32,13 +32,13 @@ public class ElasticSearchIndexer implements Indexer {
     Gson gson;
 
     /**
-     * @param configurationManager
+     * @param configuration
      */
     @Inject
-    public ElasticSearchIndexer(ConfigurationManager configurationManager, XHTMLContentParser parser, Gson gson) throws MalformedURLException {
-        String hostname  = configurationManager.getFromConfiguration("indexer.elasticsearch.hostname","localhost");
-        Integer port     = configurationManager.getConfiguration().getInt("indexer.elasticsearch.port", 9300);
-        this.index       = configurationManager.getFromConfiguration("indexer.elasticsearch.index","cloudcrawler");
+    public ElasticSearchIndexer(Configuration configuration, XHTMLContentParser parser, Gson gson) throws MalformedURLException {
+        String hostname  = configuration.get("indexer.elasticsearch.hostname","localhost");
+        Integer port     = configuration.getInt("indexer.elasticsearch.port", 9300);
+        this.index       = configuration.get("indexer.elasticsearch.index","cloudcrawler");
 
         System.out.println(hostname+":"+port);
 
