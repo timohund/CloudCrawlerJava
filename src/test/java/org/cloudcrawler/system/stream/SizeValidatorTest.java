@@ -42,7 +42,7 @@ public class SizeValidatorTest extends AbstractTest {
         File file               = new File("src/test/fixtures/files/filesize/"+this.fixtureName);
         InputStream is          = new FileInputStream(file);
         BufferedInputStream bis = new BufferedInputStream(is);
-        boolean isValid         = this.sizeValidator.validate(bis, 1024 * 1024);
+        boolean isValid         = this.sizeValidator.isValid(bis, 1024 * 1024);
 
         Assert.assertEquals(isValid,exceptionExpected);
     }

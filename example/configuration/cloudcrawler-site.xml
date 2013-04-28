@@ -45,5 +45,24 @@
         <name>indexer.elasticsearch.index</name>
         <value>cloudcrawler</value>
     </property>
-
+    <property>
+        <name>urivalidator.scheme.allowpattern</name>
+        <value>http</value>
+    </property>
+    <property>
+        <name>urivalidator.host.allowpattern</name>
+        <value>.*</value>
+    </property>
+    <property>
+        <name>urivalidator.path.allowpattern</name>
+        <value>.*</value>
+    </property>
+    <property>
+        <name>urivalidator.query.allowpattern</name>
+        <value></value>
+    </property>
+    <property>
+        <name>urivalidator.fragment.allowpattern</name>
+        <value></value>
+    </property>
 </configuration>

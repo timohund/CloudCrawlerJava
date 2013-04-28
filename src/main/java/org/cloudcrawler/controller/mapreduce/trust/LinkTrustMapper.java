@@ -13,6 +13,7 @@ import org.cloudcrawler.domain.crawler.message.Message;
 import org.cloudcrawler.domain.crawler.message.MessagePersistenceManager;
 import org.cloudcrawler.domain.crawler.trust.link.InheritedLinkTrust;
 import org.cloudcrawler.domain.ioc.CloudCrawlerModule;
+import org.cloudcrawler.system.uri.URIValidator;
 
 import java.io.IOException;
 import java.util.Vector;
@@ -30,6 +31,8 @@ public class LinkTrustMapper extends AbstractMapper {
 
     protected XHTMLContentParser xhtmlContentParser;
 
+    protected URIValidator uriValidator;
+
     public void initialize(Configuration configuration) {
         if(this.injector == null) {
             this.injector = CloudCrawlerModule.getConfiguredInjector(configuration);
@@ -42,6 +45,14 @@ public class LinkTrustMapper extends AbstractMapper {
         if(this.messageManager == null) {
             this.setMessageManager(injector.getInstance(MessagePersistenceManager.class));
         }
+
+        if(this.uriValidator == null) {
+            this.setUriValidator(injector.getInstance(URIValidator.class));
+        }
+    }
+
+    public void setUriValidator(URIValidator uriValidator) {
+        this.uriValidator = uriValidator;
     }
 
     public void setXhtmlContentParser(XHTMLContentParser xhtmlContentParser) {
@@ -88,15 +99,23 @@ public class LinkTrustMapper extends AbstractMapper {
 
             xhtmlContentParser.initialize(crawled.getUri(), crawled.getContent(), crawled.getMimeType());
             Vector<Link> links = xhtmlContentParser.getOutgoingLinks(true);
+            Vector<Link> allowedLinks = new Vector<Link>();
+
+            for(Link link : links){
+                //only inherit link trust to allowed uris
+                if(this.uriValidator.isValid(link.getTargetUri())) {
+                    allowedLinks.add(link);
+                }
+            }
 
             double rankToInherit = 0.0;
             if(links.size() > 0) {
-                rankToInherit = inheritableRank / links.size();
+                rankToInherit = inheritableRank / allowedLinks.size();
             }
 
-            System.out.println("Processing: "+crawled.getUri().toString()+" inheriting pagepage "+rankToInherit+" to "+links.size()+" documents");
+            System.out.println("Processing: "+crawled.getUri().toString()+" inheriting pagepage "+rankToInherit+" to "+allowedLinks.size()+" documents");
 
-            for(Link link : links){
+            for(Link link : allowedLinks){
                 InheritLinkTrustMessage pageRankMessage = new InheritLinkTrustMessage();
                 InheritedLinkTrust rank = new InheritedLinkTrust();
                 rank.setLinkTrust(rankToInherit);

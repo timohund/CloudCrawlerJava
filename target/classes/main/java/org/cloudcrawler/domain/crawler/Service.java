@@ -1,5 +1,8 @@
 package org.cloudcrawler.domain.crawler;
 
+import com.google.inject.Inject;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
 import org.cloudcrawler.domain.crawler.contentparser.XHTMLContentParser;
 import org.cloudcrawler.domain.crawler.robotstxt.RobotsTxtService;
 import org.cloudcrawler.system.charset.converter.ConversionResult;
@@ -7,9 +10,7 @@ import org.cloudcrawler.system.charset.converter.ConversionService;
 import org.cloudcrawler.system.http.HttpService;
 import org.cloudcrawler.system.stream.SizeValidator;
 import org.cloudcrawler.system.uri.URIUnifier;
-import com.google.inject.Inject;
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
+import org.cloudcrawler.system.uri.URIValidator;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -17,7 +18,6 @@ import javax.xml.xpath.XPathExpressionException;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -46,18 +46,22 @@ public class Service {
 
     protected SizeValidator sizeValidator;
 
+    protected URIValidator uriValidator;
+
     @Inject
     public Service(HttpService httpService,
                    URIUnifier uriUnifier,
                    XHTMLContentParser xHTMLParser,
                    RobotsTxtService robotsTxtRobotsTxtService,
                    ConversionService utf8ConversionService,
-                   SizeValidator sizeValidator) {
+                   SizeValidator sizeValidator,
+                   URIValidator uriValidator) {
         this.httpService = httpService;
         this.xHTMLParser = xHTMLParser;
         this.robotsTxtRobotsTxtService = robotsTxtRobotsTxtService;
         this.utf8ConversionService = utf8ConversionService;
         this.sizeValidator = sizeValidator;
+        this.uriValidator = uriValidator;
     }
 
     /**
@@ -119,7 +123,7 @@ public class Service {
      * @throws IOException
      */
     protected boolean getContainsUnAllowedFileSize(BufferedInputStream bis) throws IOException {
-       boolean hasAllowedSize = sizeValidator.validate(bis, 1024*1024);
+       boolean hasAllowedSize = sizeValidator.isValid(bis, 1024 * 1024);
 
        if(!hasAllowedSize) {
            System.out.println("Crawl blocked by unallowed filesize");
@@ -223,12 +227,10 @@ public class Service {
 
         try {
             xHTMLParser.initialize(document.getUri(), document.getContent(), document.getMimeType());
-            URI baseURI = xHTMLParser.getBaseHrefUri();
             Vector<Link> links = xHTMLParser.getOutgoingLinks(false);
 
             for (Link link : links) {
-                //todo make the link validator configureable
-                if ((link == null) || !link.getTargetUri().toString().contains(".de/")) {
+                if ((link == null) || !this.uriValidator.isValid(link.getTargetUri())) {
                     continue;
                 }
 

@@ -10,6 +10,7 @@ import junit.framework.Assert;
 import junit.framework.AssertionFailedError;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
+import org.cloudcrawler.system.uri.URIValidator;
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,6 +39,8 @@ public class ServiceTest {
 
     protected SizeValidator sizeValidatorMock;
 
+    protected URIValidator uriValidatorMock;
+
     @Before
     public void setUp() {
         httpServiceMock         = EasyMock.createMock(HttpService.class);
@@ -46,8 +49,9 @@ public class ServiceTest {
         robotsTxtServiceMock    = EasyMock.createMock(RobotsTxtService.class);
         conversionServiceMock   = EasyMock.createMock(ConversionService.class);
         sizeValidatorMock       = EasyMock.createMock(SizeValidator.class);
+        uriValidatorMock        = EasyMock.createMock(URIValidator.class);
 
-        service = new Service(httpServiceMock, uriUnifier, xHTMLParserMock, robotsTxtServiceMock, conversionServiceMock, sizeValidatorMock);
+        service = new Service(httpServiceMock, uriUnifier, xHTMLParserMock, robotsTxtServiceMock, conversionServiceMock, sizeValidatorMock, uriValidatorMock);
     }
 
     /**
