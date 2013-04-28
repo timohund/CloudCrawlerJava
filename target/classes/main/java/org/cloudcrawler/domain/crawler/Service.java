@@ -227,7 +227,7 @@ public class Service {
             Vector<Link> links = xHTMLParser.getOutgoingLinks(false);
 
             for (Link link : links) {
-                //todo make the link filter configureable
+                //todo make the link validator configureable
                 if ((link == null) || !link.getTargetUri().toString().contains(".de/")) {
                     continue;
                 }
