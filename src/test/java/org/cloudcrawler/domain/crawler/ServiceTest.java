@@ -1,15 +1,14 @@
 package org.cloudcrawler.domain.crawler;
 
+import junit.framework.Assert;
+import junit.framework.AssertionFailedError;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
 import org.cloudcrawler.domain.crawler.contentparser.XHTMLContentParser;
 import org.cloudcrawler.domain.crawler.robotstxt.RobotsTxtService;
 import org.cloudcrawler.system.charset.converter.ConversionService;
 import org.cloudcrawler.system.http.HttpService;
 import org.cloudcrawler.system.stream.SizeValidator;
-import org.cloudcrawler.system.uri.URIUnifier;
-import junit.framework.Assert;
-import junit.framework.AssertionFailedError;
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
 import org.cloudcrawler.system.uri.URIValidator;
 import org.easymock.EasyMock;
 import org.junit.Before;
@@ -29,8 +28,6 @@ public class ServiceTest {
 
     protected HttpService httpServiceMock;
 
-    protected URIUnifier uriUnifier;
-
     protected XHTMLContentParser xHTMLParserMock;
 
     protected RobotsTxtService robotsTxtServiceMock;
@@ -44,14 +41,13 @@ public class ServiceTest {
     @Before
     public void setUp() {
         httpServiceMock         = EasyMock.createMock(HttpService.class);
-        uriUnifier              = EasyMock.createMock(URIUnifier.class);
         xHTMLParserMock         = EasyMock.createMock(XHTMLContentParser.class);
         robotsTxtServiceMock    = EasyMock.createMock(RobotsTxtService.class);
         conversionServiceMock   = EasyMock.createMock(ConversionService.class);
         sizeValidatorMock       = EasyMock.createMock(SizeValidator.class);
         uriValidatorMock        = EasyMock.createMock(URIValidator.class);
 
-        service = new Service(httpServiceMock, uriUnifier, xHTMLParserMock, robotsTxtServiceMock, conversionServiceMock, sizeValidatorMock, uriValidatorMock);
+        service = new Service(httpServiceMock, xHTMLParserMock, robotsTxtServiceMock, conversionServiceMock, sizeValidatorMock, uriValidatorMock);
     }
 
     /**
@@ -63,10 +59,13 @@ public class ServiceTest {
         Document document = new Document();
         document.setUri(new URI("http://www.google.de/"));
 
-            //when the head request is indicating an mpeg there should never be a get request triggered
+        expect(uriValidatorMock.isValid(isA(URI.class))).andReturn(true).anyTimes();
+
+        //when the head request is indicating an mpeg there should never be a get request triggered
         expect(httpServiceMock.get(isA(URI.class))).andThrow(new AssertionFailedError()).anyTimes();
             //since we do not want to test the robots txt service here we mock it with allways allow
         expect(robotsTxtServiceMock.isAllowedUri(isA(URI.class))).andReturn(true).anyTimes();
+
 
         HttpResponse httpResponseMock   = EasyMock.createMock(HttpResponse.class);
         Header httpHeaderMock           = EasyMock.createMock(Header.class);
@@ -77,6 +76,7 @@ public class ServiceTest {
         expect(httpServiceMock.close(isA(HttpResponse.class))).andReturn(true);
         expect(httpServiceMock.reset()).andReturn(true);
 
+        replay(uriValidatorMock);
         replay(httpServiceMock);
         replay(robotsTxtServiceMock);
         replay(httpResponseMock);
@@ -105,6 +105,8 @@ public class ServiceTest {
         Document document = new Document();
         document.setUri(new URI("http://www.google.de/"));
 
+        expect(uriValidatorMock.isValid(isA(URI.class))).andReturn(true).anyTimes();
+
         //since we do not want to test the robots txt service here we mock it with allways allow
         expect(robotsTxtServiceMock.isAllowedUri(isA(URI.class))).andReturn(true).anyTimes();
 
@@ -120,10 +122,9 @@ public class ServiceTest {
         expect(httpServiceMock.get(isA(URI.class))).andReturn(httpResponseMock);
         expect(httpResponseMock.getLastHeader(isA(String.class))).andReturn(httpHeaderMock);
         expect(httpHeaderMock.getValue()).andReturn("appclication/pdf");
- //TODO: This seems to be a bug
- //       expect(httpServiceMock.close(isA(HttpResponse.class))).andReturn(true);
         expect(httpServiceMock.reset()).andReturn(true);
 
+        replay(uriValidatorMock);
         replay(httpServiceMock);
         replay(robotsTxtServiceMock);
         replay(httpResponseMock);

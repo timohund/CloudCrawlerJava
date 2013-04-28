@@ -9,7 +9,6 @@ import org.cloudcrawler.system.charset.converter.ConversionResult;
 import org.cloudcrawler.system.charset.converter.ConversionService;
 import org.cloudcrawler.system.http.HttpService;
 import org.cloudcrawler.system.stream.SizeValidator;
-import org.cloudcrawler.system.uri.URIUnifier;
 import org.cloudcrawler.system.uri.URIValidator;
 import org.xml.sax.SAXException;
 
@@ -50,7 +49,6 @@ public class Service {
 
     @Inject
     public Service(HttpService httpService,
-                   URIUnifier uriUnifier,
                    XHTMLContentParser xHTMLParser,
                    RobotsTxtService robotsTxtRobotsTxtService,
                    ConversionService utf8ConversionService,
@@ -77,10 +75,16 @@ public class Service {
         try {
             Vector<Document> results = new Vector<Document>();
 
+            if(!this.uriValidator.isValid(toCrawl.getUri())) {
+                System.out.println("Unallowed url "+toCrawl.getUri().toString());
+                return results;
+            }
+
             if (getRequestIsUnAllowedByRobotsTxt(toCrawl) ||
                     getHeadRequestIndicatesUnAllowedContentType(toCrawl)) {
                 return results;
             }
+
 
             HttpResponse getResponse = httpService.get(toCrawl.getUri());
             Header header = getResponse.getLastHeader(new String("Content-Type"));
@@ -159,7 +163,6 @@ public class Service {
      * @return boolean
      */
     private boolean getGetRequestIndicatesUnAllowedContentType(String getMimeType) {
-        Vector<Document> results;
         Boolean isGetIndicatingHtml = getMimeType.contains(new String("text/html"));
         if (!isGetIndicatingHtml) {
             System.out.println("No html response indicated in get");
