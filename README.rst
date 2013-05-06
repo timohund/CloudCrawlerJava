@@ -55,6 +55,8 @@ The job can be repeated several times and the crawler will discover more and mor
 
 
 
-
+.. |buildStatusIcon| image:: https://travis-ci.org/timoschmidt/CloudCrawlerJava.png?branch=master
+   :alt: Build Status
+   :target: https://travis-ci.org/timoschmidt/CloudCrawlerJava
 
 
