@@ -1,0 +1,13 @@
+org/cloudcrawler/domain/crawler/trust/link/LinkTrustMergerTest.class
+org/cloudcrawler/system/stream/SizeValidatorTest.class
+org/cloudcrawler/system/uri/URIValidatorTest.class
+org/cloudcrawler/domain/crawler/ServiceTest.class
+org/cloudcrawler/domain/crawler/contentparser/XHTMLContentParserTest.class
+org/cloudcrawler/system/uri/UriUnifierTest.class
+org/cloudcrawler/domain/crawler/DocumentMergerTest.class
+org/cloudcrawler/system/charset/conversion/HtmlConversionServiceTest.class
+org/cloudcrawler/domain/crawler/robotstxt/parser/SimpleRobotRulesParserTest.class
+org/cloudcrawler/AbstractTest.class
+org/cloudcrawler/system/charset/conversion/SimpleConversionServiceTest.class
+org/cloudcrawler/controller/mapreduce/CrawlingMapperTest.class
+org/cloudcrawler/domain/crawler/schedule/FixedAmountPerRunTest.class
