@@ -33,6 +33,7 @@ The crawler can be used the following way:
 eg:
 
     http://www.heise.de/
+
     http://www.spiegel.de/
 
 2. Copy the file to hdfs
