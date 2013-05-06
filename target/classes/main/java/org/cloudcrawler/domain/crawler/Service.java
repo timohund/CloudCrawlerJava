@@ -91,7 +91,6 @@ public class Service {
             String getMimeType = header.getValue();
 
             if (getGetRequestIndicatesUnAllowedContentType(getMimeType)) {
-                this.httpService.close(getResponse);
                 return results;
             }
 

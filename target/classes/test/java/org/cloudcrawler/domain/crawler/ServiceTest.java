@@ -123,7 +123,6 @@ public class ServiceTest {
         expect(httpResponseMock.getLastHeader(isA(String.class))).andReturn(httpHeaderMock);
         expect(httpHeaderMock.getValue()).andReturn("appclication/pdf");
         expect(httpServiceMock.reset()).andReturn(true);
-        expect(httpServiceMock.close(isA(HttpResponse.class))).andReturn(true);
 
         replay(uriValidatorMock);
         replay(httpServiceMock);
