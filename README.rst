@@ -1,6 +1,10 @@
 About
 ===========
 
+:Author: Timo Schmidt <timo-schmidt@gmx.net>
+:Description: Crawler based on mapreduce for Apache Hadoop
+:Build status: |buildStatusIcon|
+
 Cloudcrawler is java based crawler based on hadoop/mapreduces.
 The goal was to get familar with apache hadoop.
 
