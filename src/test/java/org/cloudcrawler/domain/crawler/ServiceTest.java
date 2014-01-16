@@ -82,7 +82,7 @@ public class ServiceTest {
         replay(httpResponseMock);
         replay(httpHeaderMock);
 
-        Vector<Document> documents =  service.crawlAndFollowLinks(document);
+        Vector<Document> documents =  service.crawlAndFollowLinks(document, true);
 
         verify(httpServiceMock);
         verify(robotsTxtServiceMock);
@@ -130,7 +130,7 @@ public class ServiceTest {
         replay(httpResponseMock);
         replay(httpHeaderMock);
 
-        Vector<Document> documents =  service.crawlAndFollowLinks(document);
+        Vector<Document> documents =  service.crawlAndFollowLinks(document, true);
 
         verify(httpServiceMock);
         verify(robotsTxtServiceMock);

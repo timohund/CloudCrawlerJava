@@ -37,8 +37,8 @@ org/cloudcrawler/domain/ioc/CloudCrawlerModule.class
 org/cloudcrawler/domain/crawler/robotstxt/parser/BaseRobotsParser.class
 org/cloudcrawler/domain/crawler/robotstxt/parser/SimpleRobotRulesParser$ParseState.class
 org/cloudcrawler/domain/crawler/trust/link/UnexpectedMessageException.class
-org/cloudcrawler/domain/crawler/Document.class
 org/cloudcrawler/domain/crawler/DocumentMerger.class
+org/cloudcrawler/domain/crawler/Document.class
 org/cloudcrawler/domain/crawler/trust/link/InheritedLinkTrust.class
 org/cloudcrawler/domain/crawler/schedule/EverythingDirectlyStrategy.class
 org/cloudcrawler/domain/crawler/robotstxt/cache/Cache.class

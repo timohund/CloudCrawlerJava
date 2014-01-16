@@ -1,14 +1,12 @@
 package org.cloudcrawler.domain.ioc;
 
+import com.google.inject.*;
 import org.cloudcrawler.domain.crawler.robotstxt.cache.Cache;
 import org.cloudcrawler.domain.crawler.schedule.CrawlingScheduleStrategy;
 import org.cloudcrawler.domain.crawler.schedule.FixedAmountPerRunStrategy;
 import org.cloudcrawler.domain.indexer.Indexer;
-import com.google.inject.Binder;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
 import org.apache.hadoop.conf.Configuration;
+import org.cloudcrawler.system.configuration.ConfigurationReader;
 
 
 /**
@@ -64,6 +62,12 @@ public class CloudCrawlerModule implements Module {
      */
     public static Injector getConfiguredInjector(Configuration configuration) {
         CloudCrawlerModule module = new CloudCrawlerModule(configuration);
-        return Guice.createInjector(module);
+        Injector injector = Guice.createInjector(module);
+
+        //initialize configurationReader singleton
+        ConfigurationReader configurationReader = injector.getInstance(ConfigurationReader.class);
+        configurationReader.setConfiguration(configuration);
+
+        return injector;
     }
 }

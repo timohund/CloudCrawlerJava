@@ -97,7 +97,7 @@ public class CrawlingMapper extends AbstractMapper {
                     return;
                 }
 
-                Vector<Document> crawlingResults = crawlingService.crawlAndFollowLinks(crawled);
+                Vector<Document> crawlingResults = crawlingService.crawlAndFollowLinks(crawled, false);
 
                 for(Document crawlingResult : crawlingResults) {
                     DocumentMessage linkTargetCrawlingMessage = new DocumentMessage();

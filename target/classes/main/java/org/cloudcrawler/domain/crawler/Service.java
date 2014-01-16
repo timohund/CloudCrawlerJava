@@ -70,7 +70,7 @@ public class Service {
      * @return Vector<Document>
      * @throws Exception
      */
-    public Vector<Document> crawlAndFollowLinks(Document toCrawl) throws Exception {
+    public Vector<Document> crawlAndFollowLinks(Document toCrawl, boolean storeContent) throws Exception {
 
         try {
             Vector<Document> results = new Vector<Document>();
@@ -111,6 +111,10 @@ public class Service {
             toCrawl.setMimeType(getMimeType);
             results.add(toCrawl);
             results = this.prepareLinkedDocuments(results, toCrawl);
+
+            if(!storeContent) {
+                toCrawl.setContent("");
+            }
             this.httpService.close(getResponse);
 
             return results;

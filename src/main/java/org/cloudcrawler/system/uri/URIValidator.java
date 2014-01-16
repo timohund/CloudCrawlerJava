@@ -2,6 +2,7 @@ package org.cloudcrawler.system.uri;
 
 import com.google.inject.Inject;
 import org.apache.hadoop.conf.Configuration;
+import org.cloudcrawler.system.configuration.ConfigurationReader;
 
 import java.net.URI;
 
@@ -20,7 +21,8 @@ public class URIValidator {
     protected String fragmentAllowPattern = ".*";
 
     @Inject
-    public URIValidator(Configuration configuration) {
+    public URIValidator(ConfigurationReader configurationReader) {
+        Configuration configuration = configurationReader.getConfiguration();
         this.schemeAllowPattern     = configuration.get("urivalidator.scheme.allowpattern",".*");
         this.hostAllowPattern       = configuration.get("urivalidator.host.allowpattern",".*");
         this.pathAllowPattern       = configuration.get("urivalidator.path.allowpattern",".*");

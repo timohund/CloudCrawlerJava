@@ -71,7 +71,7 @@ public class CrawlingMapperTest {
 
                 //we expect that the crawling service is triggered to crawl one document
                 //and follow the links
-            expect(crawlingServiceMock.crawlAndFollowLinks(isA(Document.class))).andThrow(new Exception(
+            expect(crawlingServiceMock.crawlAndFollowLinks(isA(Document.class),isA(boolean.class))).andThrow(new Exception(
                 "test exception"
             ));
 
@@ -93,7 +93,7 @@ public class CrawlingMapperTest {
     public void crawlingDocumentWithStateWaitingWillNotBeCrawled() throws Exception {
 
                 //crawl should never be executed because we pass a document in the state waiting
-        expect(crawlingServiceMock.crawlAndFollowLinks(isA(Document.class))).andThrow(new AssertionFailedError()).anyTimes();
+        expect(crawlingServiceMock.crawlAndFollowLinks(isA(Document.class),isA(boolean.class))).andThrow(new AssertionFailedError()).anyTimes();
 
         replay(crawlingServiceMock);
             DocumentMessage inputMessage   = new DocumentMessage();

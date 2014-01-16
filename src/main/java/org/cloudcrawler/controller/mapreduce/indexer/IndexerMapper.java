@@ -78,9 +78,6 @@ public class IndexerMapper extends AbstractMapper {
                 //small sleep after index
                 Thread.sleep(500);
             }
-
-
-
         } catch (Exception e) {
             System.out.println(e.getMessage());
             e.printStackTrace();

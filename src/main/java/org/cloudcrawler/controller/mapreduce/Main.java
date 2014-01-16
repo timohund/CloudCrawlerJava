@@ -1,5 +1,6 @@
 package org.cloudcrawler.controller.mapreduce;
 
+import com.google.inject.Injector;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -12,6 +13,7 @@ import org.cloudcrawler.controller.mapreduce.crawler.CrawlingReducer;
 import org.cloudcrawler.controller.mapreduce.indexer.IndexerMapper;
 import org.cloudcrawler.controller.mapreduce.trust.LinkTrustMapper;
 import org.cloudcrawler.controller.mapreduce.trust.LinkTrustReducer;
+import org.cloudcrawler.domain.ioc.CloudCrawlerModule;
 
 /**
  * MapReduce job that is taking the url list
@@ -31,6 +33,11 @@ public class Main {
      */
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
+
+        if(args.length > 3 && args[3] != null) {
+            conf.addResource(new Path(args[3]));
+            conf.reloadConfiguration();
+        }
 
         String action = args[0];
 

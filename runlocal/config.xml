@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<configuration>
+	<property>
+		<name>indexer.index.class</name>
+		<value>org.cloudcrawler.domain.indexer.elasticsearch.ElasticSearchIndexer</value>
+	</property>
+	<property>
+		<name>indexer.elasticsearch.hostname</name>
+		<value>localhost</value>
+	</property>
+</configuration>
