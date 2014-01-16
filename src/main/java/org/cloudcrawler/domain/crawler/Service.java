@@ -12,6 +12,7 @@ import org.cloudcrawler.system.stream.SizeValidator;
 import org.cloudcrawler.system.uri.URIValidator;
 import org.xml.sax.SAXException;
 
+import javax.swing.text.StyledEditorKit;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 import java.io.BufferedInputStream;
