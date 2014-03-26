@@ -55,6 +55,8 @@ public class SolrIndexer implements Indexer {
         this.reset();
     }
 
+    public void prepare() {}
+
     protected void reset() {
         indexedDocs = new ArrayList<SolrInputDocument>();
         docCount = 0;
@@ -69,16 +71,17 @@ public class SolrIndexer implements Indexer {
     public void index(Document document) throws Exception {
         SolrInputDocument solrDocument = new SolrInputDocument();
 
-        parser.initialize(document.getUri(),document.getContent(),document.getMimeType());
+     //   parser.initialize(document.getUri(),document.getContent(),document.getMimeType());
 
         solrDocument.setField("id", document.getId());
         solrDocument.setField("url",document.getUri().toString());
-        solrDocument.setField("title", parser.getTitle());
+
+      //  solrDocument.setField("title", parser.getTitle());
 
             //@todo find a smarter way to get text and evaluate jsoup for general extraction
-        String content = document.getContent();
-        String noHtml = Jsoup.parse(content).text();
-        solrDocument.setField("content", noHtml);
+     //   String content = document.getContent();
+     //   String noHtml = Jsoup.parse(content).text();
+     //   solrDocument.setField("content", noHtml);
         solrDocument.setField("domain_s",document.getUri().getHost());
         solrDocument.setField("path_s",document.getUri().getPath());
         solrDocument.setField("source_s","org.cloudcrawler");

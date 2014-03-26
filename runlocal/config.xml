@@ -6,6 +6,6 @@
 	</property>
 	<property>
 		<name>indexer.elasticsearch.hostname</name>
-		<value>localhost</value>
+		<value>192.168.178.59</value>
 	</property>
 </configuration>

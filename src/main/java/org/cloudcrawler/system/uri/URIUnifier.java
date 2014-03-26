@@ -11,6 +11,7 @@ public class URIUnifier {
     public URIUnifier() {
 
     }
+
     /**
      * @param hrefUri
      * @param sourceUri

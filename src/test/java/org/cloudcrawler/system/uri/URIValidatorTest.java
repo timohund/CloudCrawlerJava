@@ -1,10 +1,12 @@
 package org.cloudcrawler.system.uri;
 
 import org.apache.hadoop.conf.Configuration;
+import org.cloudcrawler.system.configuration.ConfigurationReader;
 import org.cloudcrawler.system.uri.URIValidator;
 import org.easymock.EasyMock;
 import org.eclipse.jdt.internal.core.Assert;
 import org.junit.Test;
+
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -21,10 +23,12 @@ public class URIValidatorTest {
 
     @Test
     public void canValidate() throws URISyntaxException {
-        URI     allowedUri      = new URI("http://www.test.de/foo");
+        URI allowedUri      = new URI("http://www.test.de/foo");
 
         Configuration confMock = EasyMock.createMock(Configuration.class);
-        expect(confMock.get("urivalidator.scheme.allowpattern",".*")).andReturn(".*");
+        ConfigurationReader reader = new ConfigurationReader();
+        reader.setConfiguration(confMock);
+        expect(confMock.get("urivalidator.scheme.allowpattern", ".*")).andReturn(".*");
         expect(confMock.get("urivalidator.host.allowpattern",".*")).andReturn(".*de.*");
         expect(confMock.get("urivalidator.path.allowpattern",".*")).andReturn(".*");
         expect(confMock.get("urivalidator.query.allowpattern",".*")).andReturn("");
@@ -32,7 +36,7 @@ public class URIValidatorTest {
 
         replay(confMock);
 
-        URIValidator validator = new URIValidator(confMock);
+        URIValidator validator = new URIValidator(reader);
         boolean isValid = validator.isValid(allowedUri);
         Assert.isTrue(isValid);
 

@@ -50,7 +50,7 @@ public class CrawlingMapperTest {
         mapper.setCrawlingService(crawlingServiceMock);
     }
 
-    @Test
+   @Test
     public void documentCrawledWithErrorGetsIncrementedErrorCount() throws Exception {
             //only key and no json should trigger the fetching process of a document
 
@@ -88,7 +88,7 @@ public class CrawlingMapperTest {
         verify(crawlingServiceMock);
         verify(contextMock);
     }
-
+ /*
     @Test
     public void crawlingDocumentWithStateWaitingWillNotBeCrawled() throws Exception {
 
@@ -111,5 +111,5 @@ public class CrawlingMapperTest {
         replay(crawlingServiceMock);
 
         verify(crawlingServiceMock);
-    }
+    } */
 }

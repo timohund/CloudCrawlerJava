@@ -7,6 +7,9 @@ import org.cloudcrawler.domain.crawler.Document;
 import org.cloudcrawler.domain.crawler.contentparser.XHTMLContentParser;
 import org.cloudcrawler.domain.indexer.Indexer;
 import org.cloudcrawler.system.configuration.ConfigurationReader;
+import org.elasticsearch.action.admin.indices.optimize.OptimizeRequest;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.deletebyquery.DeleteByQueryRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.Client;
@@ -32,6 +35,8 @@ public class ElasticSearchIndexer implements Indexer {
 
     Gson gson;
 
+    BulkRequestBuilder bulkRequest;
+
     /**
      * @param configurationReader
      */
@@ -46,7 +51,16 @@ public class ElasticSearchIndexer implements Indexer {
 
         Settings settings   = ImmutableSettings.settingsBuilder().put("cluster.name", "cloudcrawler").build();
         this.client         = new TransportClient(settings).addTransportAddress(new InetSocketTransportAddress(hostname,port));
+
         this.gson           = gson;
+    }
+
+    public void prepare() {
+        OptimizeRequest optimizeRequest = new OptimizeRequest();
+        optimizeRequest.indices("cloudcrawler");
+        this.client.admin().indices().optimize(optimizeRequest);
+
+        bulkRequest = client.prepareBulk();
     }
 
     @Override
@@ -59,10 +73,10 @@ public class ElasticSearchIndexer implements Indexer {
     @Override
     public void index(Document document) throws Exception {
         try {
-            IndexResponse response = client.prepareIndex(index,"document").setSource(gson.toJson(document)).execute().actionGet();
-            System.out.println(response.getHeaders().toString());
+            bulkRequest.add(client.prepareIndex(index, "document").setRefresh(false).setSource(gson.toJson(document)));
         } catch (Exception e) {
 
+            e.printStackTrace();
             System.out.println(e.getMessage());
         }
 
@@ -70,6 +84,7 @@ public class ElasticSearchIndexer implements Indexer {
 
     @Override
     public void commit() throws Exception {
-
+        BulkResponse bulkResponse = bulkRequest.execute().actionGet();
     }
+
 }

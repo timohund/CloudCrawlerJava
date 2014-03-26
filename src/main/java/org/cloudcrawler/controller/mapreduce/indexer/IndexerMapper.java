@@ -12,6 +12,10 @@ import org.cloudcrawler.domain.indexer.Indexer;
 import org.cloudcrawler.domain.ioc.CloudCrawlerModule;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * The page linkTrust mapper is producing pagerank messages. It inherits his
@@ -26,11 +30,20 @@ public class IndexerMapper extends AbstractMapper {
 
     protected Injector injector;
 
+    protected int counter = 0;
+
     /**
      * @param indexer
      */
     public void setIndexer(Indexer indexer) {
         this.indexer = indexer;
+    }
+
+    /**
+     * @return Indexer
+     */
+    public Indexer getIndexer() {
+       return indexer;
     }
 
     public void initialize(Configuration configuration) throws Exception{
@@ -44,6 +57,7 @@ public class IndexerMapper extends AbstractMapper {
 
         if(this.indexer == null) {
             this.setIndexer(injector.getInstance(Indexer.class));
+            this.indexer.prepare();
         }
     }
 
@@ -57,11 +71,13 @@ public class IndexerMapper extends AbstractMapper {
      */
     public void map(Text key, Text value, Context context) throws IOException, InterruptedException {
         try {
+            context.progress();
+
             this.initialize(context.getConfiguration());
             Message message = this.messageManager.wakeup(value.toString());
 
             if(!message.getAttachmentClassname().endsWith("Document")) {
-                System.out.println("Can not handle message with class "+message.getAttachmentClassname());
+                System.out.println("Can not handle message with class " + message.getAttachmentClassname());
                 return;
             }
 
@@ -71,16 +87,54 @@ public class IndexerMapper extends AbstractMapper {
                 //keep the message
             postMessage(key,currentDocumentCrawlMessage,context);
 
-            if(crawled.getCrawlingState() == Document.CRAWLING_STATE_CRAWLED) {
+            context.progress();
+
+
+//            if(crawled.getCrawlingState() == Document.CRAWLING_STATE_CRAWLED) {
                 //and index it
                 indexer.index(crawled);
-                indexer.commit();
-                //small sleep after index
-                Thread.sleep(500);
-            }
+
+                counter++;
+                if(counter % 1000 == 0) {
+                    indexer.commit();
+                    //small sleep after index
+                    Thread.sleep(2000);
+                } else {
+                    Thread.sleep(100);
+                }
+
+                DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                Date date = new Date();
+                System.out.println("Indexing new document at:" + dateFormat.format(date));
+//          }
         } catch (Exception e) {
             System.out.println(e.getMessage());
+
+            StackTraceElement[] stackTraces = e.getStackTrace();
+
+            for(StackTraceElement stackTrace : stackTraces) {
+                System.out.println(stackTrace.getFileName()+'#'+stackTrace.getLineNumber());
+            }
+
+
             e.printStackTrace();
         }
+    }
+
+    public void cleanup(Context context) {
+        try {
+            indexer.commit();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+
+            StackTraceElement[] stackTraces = e.getStackTrace();
+
+            for(StackTraceElement stackTrace : stackTraces) {
+                System.out.println(stackTrace.getFileName()+'#'+stackTrace.getLineNumber());
+            }
+
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+
     }
 }
